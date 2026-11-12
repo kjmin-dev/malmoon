@@ -1,0 +1,250 @@
+{
+  "color": {
+    "$type": "color",
+    "overlay": {
+      "$description": "The prompter overlay sits on top of arbitrary screen content, so it is dark and translucent in both modes.",
+      "surface": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.0627, 0.0627, 0.0784],
+          "alpha": 0.72,
+          "hex": "#101014"
+        },
+        "$description": "Tint over the blurred backdrop."
+      },
+      "border": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [1.0, 1.0, 1.0],
+          "alpha": 0.12,
+          "hex": "#ffffff"
+        }
+      },
+      "text-primary": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [1.0, 1.0, 1.0],
+          "alpha": 0.96,
+          "hex": "#ffffff"
+        },
+        "$description": "Settled captions."
+      },
+      "text-draft": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [1.0, 1.0, 1.0],
+          "alpha": 0.6,
+          "hex": "#ffffff"
+        },
+        "$description": "Captions that recognition may still revise."
+      },
+      "text-uncertain": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [1.0, 0.8314, 0.4745],
+          "hex": "#ffd479"
+        },
+        "$description": "Words recognized with low confidence."
+      }
+    }
+  },
+  "space": {
+    "$type": "dimension",
+    "1": {
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      }
+    },
+    "2": {
+      "$value": {
+        "value": 8,
+        "unit": "px"
+      }
+    },
+    "3": {
+      "$value": {
+        "value": 12,
+        "unit": "px"
+      }
+    },
+    "4": {
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      }
+    },
+    "6": {
+      "$value": {
+        "value": 24,
+        "unit": "px"
+      }
+    },
+    "8": {
+      "$value": {
+        "value": 32,
+        "unit": "px"
+      }
+    }
+  },
+  "radius": {
+    "$type": "dimension",
+    "sm": {
+      "$value": {
+        "value": 6,
+        "unit": "px"
+      }
+    },
+    "md": {
+      "$value": {
+        "value": 10,
+        "unit": "px"
+      }
+    },
+    "lg": {
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      }
+    },
+    "full": {
+      "$value": {
+        "value": 9999,
+        "unit": "px"
+      }
+    }
+  },
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "sans": {
+        "$value": ["Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "system-ui", "sans-serif"]
+      }
+    },
+    "size": {
+      "$type": "dimension",
+      "xs": {
+        "$value": {
+          "value": 12,
+          "unit": "px"
+        }
+      },
+      "sm": {
+        "$value": {
+          "value": 13,
+          "unit": "px"
+        }
+      },
+      "md": {
+        "$value": {
+          "value": 15,
+          "unit": "px"
+        }
+      },
+      "lg": {
+        "$value": {
+          "value": 18,
+          "unit": "px"
+        }
+      },
+      "xl": {
+        "$value": {
+          "value": 22,
+          "unit": "px"
+        }
+      },
+      "caption": {
+        "$value": {
+          "value": 20,
+          "unit": "px"
+        },
+        "$description": "Live captions in the prompter."
+      }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "$description": "Only weights that ship as static font files. GPUI ignores the weight axis of variable fonts.",
+      "regular": {
+        "$value": 400
+      },
+      "semibold": {
+        "$value": 600
+      },
+      "bold": {
+        "$value": 700
+      }
+    },
+    "line-height": {
+      "$type": "number",
+      "tight": {
+        "$value": 1.25
+      },
+      "normal": {
+        "$value": 1.5
+      }
+    }
+  },
+  "motion": {
+    "duration": {
+      "$type": "duration",
+      "fast": {
+        "$value": {
+          "value": 120,
+          "unit": "ms"
+        }
+      },
+      "normal": {
+        "$value": {
+          "value": 200,
+          "unit": "ms"
+        }
+      },
+      "slow": {
+        "$value": {
+          "value": 320,
+          "unit": "ms"
+        }
+      }
+    },
+    "easing": {
+      "$type": "cubicBezier",
+      "standard": {
+        "$value": [0.2, 0, 0, 1]
+      }
+    },
+    "caption-confirm": {
+      "$type": "duration",
+      "$value": "{motion.duration.normal}",
+      "$description": "A draft caption settling into its final form."
+    }
+  },
+  "shadow": {
+    "$type": "shadow",
+    "overlay": {
+      "$value": {
+        "color": {
+          "colorSpace": "srgb",
+          "components": [0.0, 0.0, 0.0],
+          "alpha": 0.35,
+          "hex": "#000000"
+        },
+        "offsetX": {
+          "value": 0,
+          "unit": "px"
+        },
+        "offsetY": {
+          "value": 8,
+          "unit": "px"
+        },
+        "blur": {
+          "value": 24,
+          "unit": "px"
+        },
+        "spread": {
+          "value": 0,
+          "unit": "px"
+        }
+      }
+    }
+  }
+}

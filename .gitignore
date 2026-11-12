@@ -7,11 +7,22 @@
 
 # Rust
 target/
+# ts-rs writes here when run without TS_RS_EXPORT_DIR. `mise run protocol` sets it.
+bindings/
 
 # Node
 node_modules/
 dist/
+*.tsbuildinfo
+
+# mise
+mise.local.toml
+mise.*.local.toml
 
 # Environment
 .env
 .env.*
+config.toml
+
+# Local experiments
+spikes/

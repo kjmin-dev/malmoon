@@ -1,0 +1,16 @@
+[tasks.dev]
+description = "Run the web app on http://localhost:5173 (expects the gateway to be running)"
+depends = ["//:install"]
+run = "pnpm exec vite"
+
+[tasks.build]
+description = "Build the web app into dist/"
+depends = ["//:install"]
+run = "pnpm exec vite build"
+sources = ["src/**/*", "index.html", "vite.config.ts", "../../packages/*/src/**/*"]
+outputs = ["dist/**/*"]
+
+[tasks.preview]
+description = "Serve the built web app"
+depends = ["build"]
+run = "pnpm exec vite preview"

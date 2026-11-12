@@ -1,0 +1,16 @@
+[package]
+name = "malmoon-ui"
+description = "Malmoon's GPUI components and the bridge from design tokens to GPUI."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+malmoon-core = { workspace = true }
+malmoon-tokens = { workspace = true }
+
+gpui-kit = { workspace = true }
+
+[lints]
+workspace = true
