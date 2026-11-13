@@ -1,0 +1,33 @@
+{
+  "size": {
+    "$type": "dimension",
+    "$description": "Control heights for fingers. 48 satisfies both Android (48dp) and iOS (44pt).",
+    "control": {
+      "sm": {
+        "$value": {
+          "value": 40,
+          "unit": "px"
+        }
+      },
+      "md": {
+        "$value": {
+          "value": 48,
+          "unit": "px"
+        }
+      },
+      "lg": {
+        "$value": {
+          "value": 56,
+          "unit": "px"
+        }
+      }
+    },
+    "target-min": {
+      "$value": {
+        "value": 48,
+        "unit": "px"
+      },
+      "$description": "The smallest area that reacts to a press, whatever the control looks like."
+    }
+  }
+}

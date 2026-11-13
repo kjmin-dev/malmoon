@@ -2,37 +2,116 @@
 
 use std::time::Duration;
 
-use crate::{Color, CubicBezier, Shadow};
+use crate::{Color, CubicBezier, Shadow, Typography};
 
 /// Every color token, for one mode.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Colors {
-    /// Tint over the blurred backdrop.
+    /// The prompter panel. Translucent and dark in both color schemes: it sits on top of other people's video.
     pub overlay_surface: Color,
     pub overlay_border: Color,
     /// Settled captions.
     pub overlay_text_primary: Color,
-    /// Captions that recognition may still revise.
+    /// Captions the speech model may still revise.
     pub overlay_text_draft: Color,
-    /// Words recognized with low confidence.
+    /// Words the speech model is unsure about.
     pub overlay_text_uncertain: Color,
     /// Page background.
     pub background_base: Color,
     /// Cards and panels on top of the page.
     pub background_surface: Color,
+    /// Surfaces that float above the page: menus, dialogs. Lighter than the page in dark mode, where shadows barely show.
+    pub background_raised: Color,
+    /// Fill of a disabled control.
+    pub background_disabled: Color,
     pub text_primary: Color,
+    /// Supporting text. Still readable: 4.5:1 on every background.
     pub text_secondary: Color,
+    /// Text of a disabled control. Exempt from contrast rules, and meant to look unavailable.
+    pub text_disabled: Color,
+    /// Links and accent-colored text on a neutral background.
+    pub text_accent: Color,
     /// Text on an accent-colored surface.
     pub text_on_accent: Color,
+    /// Text on a danger-colored surface.
+    pub text_on_danger: Color,
+    /// Dividers and card outlines. Decorative, so low contrast is fine.
     pub border_default: Color,
-    /// Primary actions and focus.
+    /// Outline of a control that would be invisible without it, such as a text field: 3:1 against the background.
+    pub border_strong: Color,
+    /// Focus ring: 3:1 against the background.
+    pub border_focus: Color,
+    /// The one action a view is for, and selected states.
     pub accent_default: Color,
+    pub accent_hover: Color,
+    pub accent_pressed: Color,
+    /// Tinted background for accent-colored text.
+    pub accent_subtle: Color,
+    /// Fill of a neutral control, such as a secondary button.
+    pub control_default: Color,
+    pub control_hover: Color,
+    pub control_pressed: Color,
+    /// Fill of a destructive action.
+    pub danger_default: Color,
+    pub danger_hover: Color,
+    pub danger_pressed: Color,
+    /// Status colors are for text and icons. Never the only signal: pair them with a word or an icon.
     pub status_danger: Color,
+    pub status_danger_subtle: Color,
     pub status_success: Color,
+    pub status_success_subtle: Color,
     pub status_warning: Color,
+    pub status_warning_subtle: Color,
+    pub status_info: Color,
+    pub status_info_subtle: Color,
+    /// Where a meeting's data goes. Product-specific, so not part of the palette.
     pub data_path_standard: Color,
     pub data_path_zero_retention: Color,
     pub data_path_confidential: Color,
+    pub button_primary_background: Color,
+    pub button_primary_background_hover: Color,
+    pub button_primary_background_pressed: Color,
+    pub button_primary_text: Color,
+    pub button_secondary_background: Color,
+    pub button_secondary_background_hover: Color,
+    pub button_secondary_background_pressed: Color,
+    pub button_secondary_text: Color,
+    /// A ghost button has no fill until it is hovered.
+    pub button_ghost_background_hover: Color,
+    pub button_ghost_background_pressed: Color,
+    pub button_ghost_text: Color,
+    pub button_danger_background: Color,
+    pub button_danger_background_hover: Color,
+    pub button_danger_background_pressed: Color,
+    pub button_danger_text: Color,
+    pub button_disabled_background: Color,
+    pub button_disabled_text: Color,
+    pub field_background: Color,
+    pub field_border: Color,
+    pub field_border_focus: Color,
+    pub field_border_invalid: Color,
+    pub field_text: Color,
+    /// Placeholder text is text: it meets 4.5:1 like any other.
+    pub field_placeholder: Color,
+    pub badge_neutral_background: Color,
+    pub badge_neutral_text: Color,
+    pub badge_accent_background: Color,
+    pub badge_accent_text: Color,
+    pub badge_success_background: Color,
+    pub badge_success_text: Color,
+    pub badge_warning_background: Color,
+    pub badge_warning_text: Color,
+    pub badge_danger_background: Color,
+    pub badge_danger_text: Color,
+    pub banner_success_background: Color,
+    pub banner_success_accent: Color,
+    pub banner_warning_background: Color,
+    pub banner_warning_accent: Color,
+    pub banner_danger_background: Color,
+    pub banner_danger_accent: Color,
+    pub banner_info_background: Color,
+    pub banner_info_accent: Color,
+    pub banner_text: Color,
 }
 
 pub const LIGHT: Colors = Colors {
@@ -43,17 +122,80 @@ pub const LIGHT: Colors = Colors {
     overlay_text_uncertain: Color::rgba(255, 212, 121, 1.0),
     background_base: Color::rgba(255, 255, 255, 1.0),
     background_surface: Color::rgba(245, 245, 247, 1.0),
-    text_primary: Color::rgba(22, 22, 26, 1.0),
+    background_raised: Color::rgba(255, 255, 255, 1.0),
+    background_disabled: Color::rgba(236, 236, 240, 1.0),
+    text_primary: Color::rgba(24, 24, 28, 1.0),
     text_secondary: Color::rgba(92, 92, 102, 1.0),
+    text_disabled: Color::rgba(169, 169, 180, 1.0),
+    text_accent: Color::rgba(79, 70, 229, 1.0),
     text_on_accent: Color::rgba(255, 255, 255, 1.0),
+    text_on_danger: Color::rgba(255, 255, 255, 1.0),
     border_default: Color::rgba(226, 226, 232, 1.0),
+    border_strong: Color::rgba(132, 132, 143, 1.0),
+    border_focus: Color::rgba(79, 70, 229, 1.0),
     accent_default: Color::rgba(79, 70, 229, 1.0),
-    status_danger: Color::rgba(217, 45, 32, 1.0),
+    accent_hover: Color::rgba(67, 56, 202, 1.0),
+    accent_pressed: Color::rgba(55, 48, 163, 1.0),
+    accent_subtle: Color::rgba(238, 242, 255, 1.0),
+    control_default: Color::rgba(236, 236, 240, 1.0),
+    control_hover: Color::rgba(226, 226, 232, 1.0),
+    control_pressed: Color::rgba(201, 201, 209, 1.0),
+    danger_default: Color::rgba(217, 45, 32, 1.0),
+    danger_hover: Color::rgba(180, 35, 24, 1.0),
+    danger_pressed: Color::rgba(145, 32, 24, 1.0),
+    status_danger: Color::rgba(180, 35, 24, 1.0),
+    status_danger_subtle: Color::rgba(254, 243, 242, 1.0),
     status_success: Color::rgba(6, 118, 71, 1.0),
+    status_success_subtle: Color::rgba(236, 253, 243, 1.0),
     status_warning: Color::rgba(181, 71, 8, 1.0),
+    status_warning_subtle: Color::rgba(255, 250, 235, 1.0),
+    status_info: Color::rgba(23, 92, 211, 1.0),
+    status_info_subtle: Color::rgba(239, 248, 255, 1.0),
     data_path_standard: Color::rgba(59, 91, 219, 1.0),
     data_path_zero_retention: Color::rgba(11, 114, 133, 1.0),
     data_path_confidential: Color::rgba(134, 46, 156, 1.0),
+    button_primary_background: Color::rgba(79, 70, 229, 1.0),
+    button_primary_background_hover: Color::rgba(67, 56, 202, 1.0),
+    button_primary_background_pressed: Color::rgba(55, 48, 163, 1.0),
+    button_primary_text: Color::rgba(255, 255, 255, 1.0),
+    button_secondary_background: Color::rgba(236, 236, 240, 1.0),
+    button_secondary_background_hover: Color::rgba(226, 226, 232, 1.0),
+    button_secondary_background_pressed: Color::rgba(201, 201, 209, 1.0),
+    button_secondary_text: Color::rgba(24, 24, 28, 1.0),
+    button_ghost_background_hover: Color::rgba(236, 236, 240, 1.0),
+    button_ghost_background_pressed: Color::rgba(226, 226, 232, 1.0),
+    button_ghost_text: Color::rgba(24, 24, 28, 1.0),
+    button_danger_background: Color::rgba(217, 45, 32, 1.0),
+    button_danger_background_hover: Color::rgba(180, 35, 24, 1.0),
+    button_danger_background_pressed: Color::rgba(145, 32, 24, 1.0),
+    button_danger_text: Color::rgba(255, 255, 255, 1.0),
+    button_disabled_background: Color::rgba(236, 236, 240, 1.0),
+    button_disabled_text: Color::rgba(169, 169, 180, 1.0),
+    field_background: Color::rgba(255, 255, 255, 1.0),
+    field_border: Color::rgba(132, 132, 143, 1.0),
+    field_border_focus: Color::rgba(79, 70, 229, 1.0),
+    field_border_invalid: Color::rgba(180, 35, 24, 1.0),
+    field_text: Color::rgba(24, 24, 28, 1.0),
+    field_placeholder: Color::rgba(92, 92, 102, 1.0),
+    badge_neutral_background: Color::rgba(236, 236, 240, 1.0),
+    badge_neutral_text: Color::rgba(92, 92, 102, 1.0),
+    badge_accent_background: Color::rgba(238, 242, 255, 1.0),
+    badge_accent_text: Color::rgba(79, 70, 229, 1.0),
+    badge_success_background: Color::rgba(236, 253, 243, 1.0),
+    badge_success_text: Color::rgba(6, 118, 71, 1.0),
+    badge_warning_background: Color::rgba(255, 250, 235, 1.0),
+    badge_warning_text: Color::rgba(181, 71, 8, 1.0),
+    badge_danger_background: Color::rgba(254, 243, 242, 1.0),
+    badge_danger_text: Color::rgba(180, 35, 24, 1.0),
+    banner_success_background: Color::rgba(236, 253, 243, 1.0),
+    banner_success_accent: Color::rgba(6, 118, 71, 1.0),
+    banner_warning_background: Color::rgba(255, 250, 235, 1.0),
+    banner_warning_accent: Color::rgba(181, 71, 8, 1.0),
+    banner_danger_background: Color::rgba(254, 243, 242, 1.0),
+    banner_danger_accent: Color::rgba(180, 35, 24, 1.0),
+    banner_info_background: Color::rgba(239, 248, 255, 1.0),
+    banner_info_accent: Color::rgba(23, 92, 211, 1.0),
+    banner_text: Color::rgba(24, 24, 28, 1.0),
 };
 
 pub const DARK: Colors = Colors {
@@ -64,17 +206,80 @@ pub const DARK: Colors = Colors {
     overlay_text_uncertain: Color::rgba(255, 212, 121, 1.0),
     background_base: Color::rgba(14, 14, 17, 1.0),
     background_surface: Color::rgba(24, 24, 28, 1.0),
-    text_primary: Color::rgba(242, 242, 245, 1.0),
+    background_raised: Color::rgba(34, 34, 40, 1.0),
+    background_disabled: Color::rgba(44, 44, 51, 1.0),
+    text_primary: Color::rgba(245, 245, 247, 1.0),
     text_secondary: Color::rgba(169, 169, 180, 1.0),
+    text_disabled: Color::rgba(92, 92, 102, 1.0),
+    text_accent: Color::rgba(165, 180, 252, 1.0),
     text_on_accent: Color::rgba(255, 255, 255, 1.0),
+    text_on_danger: Color::rgba(255, 255, 255, 1.0),
     border_default: Color::rgba(44, 44, 51, 1.0),
+    border_strong: Color::rgba(132, 132, 143, 1.0),
+    border_focus: Color::rgba(129, 140, 248, 1.0),
     accent_default: Color::rgba(91, 94, 240, 1.0),
+    accent_hover: Color::rgba(79, 70, 229, 1.0),
+    accent_pressed: Color::rgba(67, 56, 202, 1.0),
+    accent_subtle: Color::rgba(30, 27, 75, 1.0),
+    control_default: Color::rgba(44, 44, 51, 1.0),
+    control_hover: Color::rgba(68, 68, 76, 1.0),
+    control_pressed: Color::rgba(92, 92, 102, 1.0),
+    danger_default: Color::rgba(217, 45, 32, 1.0),
+    danger_hover: Color::rgba(180, 35, 24, 1.0),
+    danger_pressed: Color::rgba(145, 32, 24, 1.0),
     status_danger: Color::rgba(249, 112, 102, 1.0),
+    status_danger_subtle: Color::rgba(85, 22, 12, 1.0),
     status_success: Color::rgba(71, 205, 137, 1.0),
+    status_success_subtle: Color::rgba(5, 51, 33, 1.0),
     status_warning: Color::rgba(253, 176, 34, 1.0),
+    status_warning_subtle: Color::rgba(78, 29, 9, 1.0),
+    status_info: Color::rgba(83, 177, 253, 1.0),
+    status_info_subtle: Color::rgba(16, 42, 86, 1.0),
     data_path_standard: Color::rgba(141, 162, 251, 1.0),
     data_path_zero_retention: Color::rgba(102, 217, 232, 1.0),
     data_path_confidential: Color::rgba(229, 153, 247, 1.0),
+    button_primary_background: Color::rgba(91, 94, 240, 1.0),
+    button_primary_background_hover: Color::rgba(79, 70, 229, 1.0),
+    button_primary_background_pressed: Color::rgba(67, 56, 202, 1.0),
+    button_primary_text: Color::rgba(255, 255, 255, 1.0),
+    button_secondary_background: Color::rgba(44, 44, 51, 1.0),
+    button_secondary_background_hover: Color::rgba(68, 68, 76, 1.0),
+    button_secondary_background_pressed: Color::rgba(92, 92, 102, 1.0),
+    button_secondary_text: Color::rgba(245, 245, 247, 1.0),
+    button_ghost_background_hover: Color::rgba(44, 44, 51, 1.0),
+    button_ghost_background_pressed: Color::rgba(68, 68, 76, 1.0),
+    button_ghost_text: Color::rgba(245, 245, 247, 1.0),
+    button_danger_background: Color::rgba(217, 45, 32, 1.0),
+    button_danger_background_hover: Color::rgba(180, 35, 24, 1.0),
+    button_danger_background_pressed: Color::rgba(145, 32, 24, 1.0),
+    button_danger_text: Color::rgba(255, 255, 255, 1.0),
+    button_disabled_background: Color::rgba(44, 44, 51, 1.0),
+    button_disabled_text: Color::rgba(92, 92, 102, 1.0),
+    field_background: Color::rgba(14, 14, 17, 1.0),
+    field_border: Color::rgba(132, 132, 143, 1.0),
+    field_border_focus: Color::rgba(129, 140, 248, 1.0),
+    field_border_invalid: Color::rgba(249, 112, 102, 1.0),
+    field_text: Color::rgba(245, 245, 247, 1.0),
+    field_placeholder: Color::rgba(169, 169, 180, 1.0),
+    badge_neutral_background: Color::rgba(44, 44, 51, 1.0),
+    badge_neutral_text: Color::rgba(169, 169, 180, 1.0),
+    badge_accent_background: Color::rgba(30, 27, 75, 1.0),
+    badge_accent_text: Color::rgba(165, 180, 252, 1.0),
+    badge_success_background: Color::rgba(5, 51, 33, 1.0),
+    badge_success_text: Color::rgba(71, 205, 137, 1.0),
+    badge_warning_background: Color::rgba(78, 29, 9, 1.0),
+    badge_warning_text: Color::rgba(253, 176, 34, 1.0),
+    badge_danger_background: Color::rgba(85, 22, 12, 1.0),
+    badge_danger_text: Color::rgba(249, 112, 102, 1.0),
+    banner_success_background: Color::rgba(5, 51, 33, 1.0),
+    banner_success_accent: Color::rgba(71, 205, 137, 1.0),
+    banner_warning_background: Color::rgba(78, 29, 9, 1.0),
+    banner_warning_accent: Color::rgba(253, 176, 34, 1.0),
+    banner_danger_background: Color::rgba(85, 22, 12, 1.0),
+    banner_danger_accent: Color::rgba(249, 112, 102, 1.0),
+    banner_info_background: Color::rgba(16, 42, 86, 1.0),
+    banner_info_accent: Color::rgba(83, 177, 253, 1.0),
+    banner_text: Color::rgba(245, 245, 247, 1.0),
 };
 
 pub const SPACE_1: f32 = 4.0;
@@ -83,36 +288,112 @@ pub const SPACE_3: f32 = 12.0;
 pub const SPACE_4: f32 = 16.0;
 pub const SPACE_6: f32 = 24.0;
 pub const SPACE_8: f32 = 32.0;
+pub const SPACE_12: f32 = 48.0;
 
+/// Small parts inside a control: badges, checkboxes.
 pub const RADIUS_SM: f32 = 6.0;
+/// Controls: buttons, fields.
 pub const RADIUS_MD: f32 = 10.0;
+/// Containers: cards, dialogs.
 pub const RADIUS_LG: f32 = 16.0;
+/// Pills and circles.
 pub const RADIUS_FULL: f32 = 9999.0;
 
+pub const BORDER_WIDTH_THIN: f32 = 1.0;
+/// Selected and invalid states that must not rely on color alone.
+pub const BORDER_WIDTH_THICK: f32 = 2.0;
+
+/// Focus ring thickness. WCAG 2.2 asks for an indicator at least 2px thick.
+pub const FOCUS_WIDTH: f32 = 2.0;
+/// Gap between a control and its focus ring, so the ring reads against the control's own fill.
+pub const FOCUS_OFFSET: f32 = 2.0;
+
+/// Pretendard covers Hangul, Latin and Kana with matching metrics. The rest are the system fonts it falls back to.
 pub const FONT_FAMILY_SANS: &[&str] = &["Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "system-ui", "sans-serif"];
 
+/// The smallest size Hangul stays legible at.
 pub const FONT_SIZE_XS: f32 = 12.0;
-pub const FONT_SIZE_SM: f32 = 13.0;
-pub const FONT_SIZE_MD: f32 = 15.0;
+pub const FONT_SIZE_SM: f32 = 14.0;
+/// Body text. Also the size below which iOS zooms the page when a field is focused.
+pub const FONT_SIZE_MD: f32 = 16.0;
 pub const FONT_SIZE_LG: f32 = 18.0;
 pub const FONT_SIZE_XL: f32 = 22.0;
-/// Live captions in the prompter.
+pub const FONT_SIZE_2XL: f32 = 28.0;
+/// Live captions, read at a glance from a distance.
 pub const FONT_SIZE_CAPTION: f32 = 20.0;
 
 pub const FONT_WEIGHT_REGULAR: f32 = 400.0;
 pub const FONT_WEIGHT_SEMIBOLD: f32 = 600.0;
 pub const FONT_WEIGHT_BOLD: f32 = 700.0;
 
+/// Large type and single-line labels.
 pub const FONT_LINE_HEIGHT_TIGHT: f32 = 1.25;
+/// Headings and short text that may wrap.
+pub const FONT_LINE_HEIGHT_SNUG: f32 = 1.4;
+/// Body text. Hangul needs more leading than Latin at the same size.
 pub const FONT_LINE_HEIGHT_NORMAL: f32 = 1.5;
 
+/// One per screen at most: the name of the place.
+pub const TYPOGRAPHY_DISPLAY: Typography = Typography { size: 28.0, weight: 700.0, line_height: 1.25, letter_spacing: -0.3 };
+/// Section and dialog titles.
+pub const TYPOGRAPHY_TITLE: Typography = Typography { size: 22.0, weight: 700.0, line_height: 1.25, letter_spacing: -0.2 };
+/// Card titles and group headings.
+pub const TYPOGRAPHY_HEADING: Typography = Typography { size: 18.0, weight: 600.0, line_height: 1.4, letter_spacing: 0.0 };
+/// Running text.
+pub const TYPOGRAPHY_BODY: Typography = Typography { size: 16.0, weight: 400.0, line_height: 1.5, letter_spacing: 0.0 };
+/// Emphasis inside running text.
+pub const TYPOGRAPHY_BODY_STRONG: Typography = Typography { size: 16.0, weight: 600.0, line_height: 1.5, letter_spacing: 0.0 };
+/// Button labels and field labels.
+pub const TYPOGRAPHY_LABEL: Typography = Typography { size: 14.0, weight: 600.0, line_height: 1.4, letter_spacing: 0.0 };
+/// Descriptions, hints and secondary lines.
+pub const TYPOGRAPHY_DETAIL: Typography = Typography { size: 14.0, weight: 400.0, line_height: 1.5, letter_spacing: 0.0 };
+/// Badges and timestamps.
+pub const TYPOGRAPHY_FOOTNOTE: Typography = Typography { size: 12.0, weight: 600.0, line_height: 1.4, letter_spacing: 0.0 };
+/// A live caption line.
+pub const TYPOGRAPHY_CAPTION: Typography = Typography { size: 20.0, weight: 600.0, line_height: 1.25, letter_spacing: 0.0 };
+
+/// Feedback to a press or hover: must feel instant.
 pub const MOTION_DURATION_FAST: Duration = Duration::from_millis(120);
+/// Something appearing or changing place.
 pub const MOTION_DURATION_NORMAL: Duration = Duration::from_millis(200);
+/// Large surfaces: sheets, full panels.
 pub const MOTION_DURATION_SLOW: Duration = Duration::from_millis(320);
 
+/// Moving between two places on screen.
 pub const MOTION_EASING_STANDARD: CubicBezier = [0.2, 0.0, 0.0, 1.0];
+/// Arriving: starts fast, settles.
+pub const MOTION_EASING_ENTER: CubicBezier = [0.0, 0.0, 0.0, 1.0];
+/// Leaving: starts slow, gets out of the way.
+pub const MOTION_EASING_EXIT: CubicBezier = [0.3, 0.0, 1.0, 1.0];
 
-/// A draft caption settling into its final form.
+/// A draft caption settling into its final wording.
 pub const MOTION_CAPTION_CONFIRM: Duration = Duration::from_millis(200);
 
-pub const SHADOW_OVERLAY: Shadow = Shadow { color: Color::rgba(0, 0, 0, 0.35), offset_x: 0.0, offset_y: 8.0, blur: 24.0, spread: 0.0 };
+/// Menus and dialogs. Paired with background.raised, which carries the elevation in dark mode.
+pub const SHADOW_RAISED: Shadow = Shadow { color: Color::rgba(0, 0, 0, 0.12), offset_x: 0.0, offset_y: 4.0, blur: 16.0, spread: 0.0 };
+/// The prompter panel, over arbitrary screen content.
+pub const SHADOW_OVERLAY: Shadow = Shadow { color: Color::rgba(0, 0, 0, 0.35), offset_x: 0.0, offset_y: 12.0, blur: 32.0, spread: 0.0 };
+
+/// Control sizes, for one input device.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Sizes {
+    pub control_sm: f32,
+    pub control_md: f32,
+    pub control_lg: f32,
+    /// The smallest area that reacts to a press, whatever the control looks like.
+    pub target_min: f32,
+}
+
+pub const POINTER: Sizes = Sizes {
+    control_sm: 28.0,
+    control_md: 36.0,
+    control_lg: 44.0,
+    target_min: 24.0,
+};
+
+pub const TOUCH: Sizes = Sizes {
+    control_sm: 40.0,
+    control_md: 48.0,
+    control_lg: 56.0,
+    target_min: 48.0,
+};

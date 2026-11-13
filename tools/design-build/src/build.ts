@@ -41,7 +41,7 @@ async function main(): Promise<number> {
     }
   }
 
-  const summary = `${model.colors.length} colors, ${model.values.length} other tokens`;
+  const summary = `${model.colors.length} colors, ${model.sizes.length} sizes, ${model.values.length} other tokens`;
   if (check && stale.length > 0) {
     console.error(`Generated token files are out of date (${summary}):`);
     for (const path of stale) console.error(`  ${path}`);

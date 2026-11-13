@@ -55,9 +55,40 @@ pub struct Shadow {
     pub spread: f32,
 }
 
+/// A text style. Sizes are in logical pixels.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Typography {
+    pub size: f32,
+    pub weight: f32,
+    /// A multiple of `size`.
+    pub line_height: f32,
+    pub letter_spacing: f32,
+}
+
+impl Typography {
+    /// The line height in logical pixels.
+    pub fn line_height_px(&self) -> f32 {
+        (self.size * self.line_height).round()
+    }
+}
+
+// Checked when the crate compiles, so a token edit that breaks these cannot build.
+const _: () = {
+    assert!(TOUCH.control_md > POINTER.control_md);
+    // WCAG 2.2 (2.5.8) for a pointer; the platform guidelines for a finger.
+    assert!(POINTER.target_min >= 24.0);
+    assert!(TOUCH.target_min >= 44.0);
+};
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn line_height_is_whole_pixels() {
+        assert_eq!(TYPOGRAPHY_BODY.line_height_px(), 24.0);
+        assert_eq!(TYPOGRAPHY_DISPLAY.line_height_px(), 35.0);
+    }
 
     #[test]
     fn both_modes_are_generated() {
