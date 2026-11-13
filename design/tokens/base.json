@@ -2,7 +2,6 @@
   "color": {
     "$type": "color",
     "overlay": {
-      "$description": "The prompter overlay sits on top of arbitrary screen content, so it is dark and translucent in both modes.",
       "surface": {
         "$value": {
           "colorSpace": "srgb",
@@ -10,7 +9,7 @@
           "alpha": 0.72,
           "hex": "#101014"
         },
-        "$description": "Tint over the blurred backdrop."
+        "$description": "The prompter panel. Translucent and dark in both color schemes: it sits on top of other people's video."
       },
       "border": {
         "$value": {
@@ -36,7 +35,7 @@
           "alpha": 0.6,
           "hex": "#ffffff"
         },
-        "$description": "Captions that recognition may still revise."
+        "$description": "Captions the speech model may still revise."
       },
       "text-uncertain": {
         "$value": {
@@ -44,12 +43,13 @@
           "components": [1.0, 0.8314, 0.4745],
           "hex": "#ffd479"
         },
-        "$description": "Words recognized with low confidence."
+        "$description": "Words the speech model is unsure about."
       }
     }
   },
   "space": {
     "$type": "dimension",
+    "$description": "A 4px grid. The name is the multiple of 4.",
     "1": {
       "$value": {
         "value": 4,
@@ -85,6 +85,12 @@
         "value": 32,
         "unit": "px"
       }
+    },
+    "12": {
+      "$value": {
+        "value": 48,
+        "unit": "px"
+      }
     }
   },
   "radius": {
@@ -93,32 +99,72 @@
       "$value": {
         "value": 6,
         "unit": "px"
-      }
+      },
+      "$description": "Small parts inside a control: badges, checkboxes."
     },
     "md": {
       "$value": {
         "value": 10,
         "unit": "px"
-      }
+      },
+      "$description": "Controls: buttons, fields."
     },
     "lg": {
       "$value": {
         "value": 16,
         "unit": "px"
-      }
+      },
+      "$description": "Containers: cards, dialogs."
     },
     "full": {
       "$value": {
         "value": 9999,
         "unit": "px"
+      },
+      "$description": "Pills and circles."
+    }
+  },
+  "border": {
+    "width": {
+      "$type": "dimension",
+      "thin": {
+        "$value": {
+          "value": 1,
+          "unit": "px"
+        }
+      },
+      "thick": {
+        "$value": {
+          "value": 2,
+          "unit": "px"
+        },
+        "$description": "Selected and invalid states that must not rely on color alone."
       }
+    }
+  },
+  "focus": {
+    "$type": "dimension",
+    "width": {
+      "$value": {
+        "value": 2,
+        "unit": "px"
+      },
+      "$description": "Focus ring thickness. WCAG 2.2 asks for an indicator at least 2px thick."
+    },
+    "offset": {
+      "$value": {
+        "value": 2,
+        "unit": "px"
+      },
+      "$description": "Gap between a control and its focus ring, so the ring reads against the control's own fill."
     }
   },
   "font": {
     "family": {
       "$type": "fontFamily",
       "sans": {
-        "$value": ["Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "system-ui", "sans-serif"]
+        "$value": ["Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "system-ui", "sans-serif"],
+        "$description": "Pretendard covers Hangul, Latin and Kana with matching metrics. The rest are the system fonts it falls back to."
       }
     },
     "size": {
@@ -127,19 +173,21 @@
         "$value": {
           "value": 12,
           "unit": "px"
-        }
+        },
+        "$description": "The smallest size Hangul stays legible at."
       },
       "sm": {
         "$value": {
-          "value": 13,
+          "value": 14,
           "unit": "px"
         }
       },
       "md": {
         "$value": {
-          "value": 15,
+          "value": 16,
           "unit": "px"
-        }
+        },
+        "$description": "Body text. Also the size below which iOS zooms the page when a field is focused."
       },
       "lg": {
         "$value": {
@@ -153,17 +201,22 @@
           "unit": "px"
         }
       },
+      "2xl": {
+        "$value": {
+          "value": 28,
+          "unit": "px"
+        }
+      },
       "caption": {
         "$value": {
           "value": 20,
           "unit": "px"
         },
-        "$description": "Live captions in the prompter."
+        "$description": "Live captions, read at a glance from a distance."
       }
     },
     "weight": {
       "$type": "fontWeight",
-      "$description": "Only weights that ship as static font files. GPUI ignores the weight axis of variable fonts.",
       "regular": {
         "$value": 400
       },
@@ -177,11 +230,138 @@
     "line-height": {
       "$type": "number",
       "tight": {
-        "$value": 1.25
+        "$value": 1.25,
+        "$description": "Large type and single-line labels."
+      },
+      "snug": {
+        "$value": 1.4,
+        "$description": "Headings and short text that may wrap."
       },
       "normal": {
-        "$value": 1.5
+        "$value": 1.5,
+        "$description": "Body text. Hangul needs more leading than Latin at the same size."
       }
+    }
+  },
+  "typography": {
+    "$type": "typography",
+    "$description": "Text styles by role. Screens pick a role, never a raw size.",
+    "display": {
+      "$value": {
+        "fontFamily": "{font.family.sans}",
+        "fontSize": "{font.size.2xl}",
+        "fontWeight": "{font.weight.bold}",
+        "lineHeight": "{font.line-height.tight}",
+        "letterSpacing": {
+          "value": -0.3,
+          "unit": "px"
+        }
+      },
+      "$description": "One per screen at most: the name of the place."
+    },
+    "title": {
+      "$value": {
+        "fontFamily": "{font.family.sans}",
+        "fontSize": "{font.size.xl}",
+        "fontWeight": "{font.weight.bold}",
+        "lineHeight": "{font.line-height.tight}",
+        "letterSpacing": {
+          "value": -0.2,
+          "unit": "px"
+        }
+      },
+      "$description": "Section and dialog titles."
+    },
+    "heading": {
+      "$value": {
+        "fontFamily": "{font.family.sans}",
+        "fontSize": "{font.size.lg}",
+        "fontWeight": "{font.weight.semibold}",
+        "lineHeight": "{font.line-height.snug}",
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        }
+      },
+      "$description": "Card titles and group headings."
+    },
+    "body": {
+      "$value": {
+        "fontFamily": "{font.family.sans}",
+        "fontSize": "{font.size.md}",
+        "fontWeight": "{font.weight.regular}",
+        "lineHeight": "{font.line-height.normal}",
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        }
+      },
+      "$description": "Running text."
+    },
+    "body-strong": {
+      "$value": {
+        "fontFamily": "{font.family.sans}",
+        "fontSize": "{font.size.md}",
+        "fontWeight": "{font.weight.semibold}",
+        "lineHeight": "{font.line-height.normal}",
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        }
+      },
+      "$description": "Emphasis inside running text."
+    },
+    "label": {
+      "$value": {
+        "fontFamily": "{font.family.sans}",
+        "fontSize": "{font.size.sm}",
+        "fontWeight": "{font.weight.semibold}",
+        "lineHeight": "{font.line-height.snug}",
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        }
+      },
+      "$description": "Button labels and field labels."
+    },
+    "detail": {
+      "$value": {
+        "fontFamily": "{font.family.sans}",
+        "fontSize": "{font.size.sm}",
+        "fontWeight": "{font.weight.regular}",
+        "lineHeight": "{font.line-height.normal}",
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        }
+      },
+      "$description": "Descriptions, hints and secondary lines."
+    },
+    "footnote": {
+      "$value": {
+        "fontFamily": "{font.family.sans}",
+        "fontSize": "{font.size.xs}",
+        "fontWeight": "{font.weight.semibold}",
+        "lineHeight": "{font.line-height.snug}",
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        }
+      },
+      "$description": "Badges and timestamps."
+    },
+    "caption": {
+      "$value": {
+        "fontFamily": "{font.family.sans}",
+        "fontSize": "{font.size.caption}",
+        "fontWeight": "{font.weight.semibold}",
+        "lineHeight": "{font.line-height.tight}",
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        }
+      },
+      "$description": "A live caption line."
     }
   },
   "motion": {
@@ -191,35 +371,74 @@
         "$value": {
           "value": 120,
           "unit": "ms"
-        }
+        },
+        "$description": "Feedback to a press or hover: must feel instant."
       },
       "normal": {
         "$value": {
           "value": 200,
           "unit": "ms"
-        }
+        },
+        "$description": "Something appearing or changing place."
       },
       "slow": {
         "$value": {
           "value": 320,
           "unit": "ms"
-        }
+        },
+        "$description": "Large surfaces: sheets, full panels."
       }
     },
     "easing": {
       "$type": "cubicBezier",
       "standard": {
-        "$value": [0.2, 0, 0, 1]
+        "$value": [0.2, 0, 0, 1],
+        "$description": "Moving between two places on screen."
+      },
+      "enter": {
+        "$value": [0, 0, 0, 1],
+        "$description": "Arriving: starts fast, settles."
+      },
+      "exit": {
+        "$value": [0.3, 0, 1, 1],
+        "$description": "Leaving: starts slow, gets out of the way."
       }
     },
     "caption-confirm": {
       "$type": "duration",
       "$value": "{motion.duration.normal}",
-      "$description": "A draft caption settling into its final form."
+      "$description": "A draft caption settling into its final wording."
     }
   },
   "shadow": {
     "$type": "shadow",
+    "raised": {
+      "$value": {
+        "color": {
+          "colorSpace": "srgb",
+          "components": [0.0, 0.0, 0.0],
+          "alpha": 0.12,
+          "hex": "#000000"
+        },
+        "offsetX": {
+          "value": 0,
+          "unit": "px"
+        },
+        "offsetY": {
+          "value": 4,
+          "unit": "px"
+        },
+        "blur": {
+          "value": 16,
+          "unit": "px"
+        },
+        "spread": {
+          "value": 0,
+          "unit": "px"
+        }
+      },
+      "$description": "Menus and dialogs. Paired with background.raised, which carries the elevation in dark mode."
+    },
     "overlay": {
       "$value": {
         "color": {
@@ -233,18 +452,19 @@
           "unit": "px"
         },
         "offsetY": {
-          "value": 8,
+          "value": 12,
           "unit": "px"
         },
         "blur": {
-          "value": 24,
+          "value": 32,
           "unit": "px"
         },
         "spread": {
           "value": 0,
           "unit": "px"
         }
-      }
+      },
+      "$description": "The prompter panel, over arbitrary screen content."
     }
   }
 }

@@ -17,5 +17,22 @@
     "parser": {
       "tailwindDirectives": true
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["apps/mobile/**", "packages/ui-native/**"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noReactNativeRawText": {
+              "level": "error",
+              "options": {
+                "skip": ["Banner", "NativeText"]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

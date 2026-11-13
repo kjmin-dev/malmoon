@@ -1,6 +1,5 @@
-import { Button, Card } from "@heroui/react";
-import type { Account, DesktopHandoff } from "@malmoon/auth";
-import { errorMessage } from "@malmoon/auth";
+import { type Account, type DesktopHandoff, errorMessage } from "@malmoon/auth";
+import { Banner, Button, Card } from "@malmoon/ui";
 import { useState } from "react";
 import { auth, forgetDesktopHandoff } from "./auth.ts";
 
@@ -44,27 +43,20 @@ export function DesktopSignIn({
   };
 
   return (
-    <Card className="mx-auto w-full max-w-sm">
-      <Card.Header>
-        <Card.Title>데스크톱 앱에 로그인할까요?</Card.Title>
-        <Card.Description>
-          이 컴퓨터의 Malmoon 데스크톱 앱이 {who}(으)로 로그인합니다. 직접 요청한 것이 아니면
-          취소하세요.
-        </Card.Description>
-      </Card.Header>
-      <Card.Content className="flex flex-col gap-2">
-        <Button isDisabled={busy} onPress={approve} fullWidth>
+    <Card
+      title="데스크톱 앱에 로그인할까요?"
+      description={`이 컴퓨터의 Malmoon 데스크톱 앱이 ${who}(으)로 로그인합니다. 직접 요청한 것이 아니면 취소하세요.`}
+      className="mx-auto w-full max-w-sm"
+    >
+      <div className="flex flex-col gap-2">
+        <Button variant="primary" loading={busy} onPress={approve} fullWidth>
           데스크톱 앱에 로그인
         </Button>
-        <Button variant="ghost" isDisabled={busy} onPress={decline} fullWidth>
+        <Button variant="ghost" disabled={busy} onPress={decline} fullWidth>
           취소
         </Button>
-        {error && (
-          <p role="alert" className="text-mm-sm text-danger">
-            {error}
-          </p>
-        )}
-      </Card.Content>
+      </div>
+      {error && <Banner tone="danger">{error}</Banner>}
     </Card>
   );
 }

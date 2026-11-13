@@ -1,18 +1,14 @@
 //! The prompter: live captions over the meeting, and a bar to ask or translate.
 
 use futures_util::StreamExt;
-use gpui_kit::component::{
-    Sizable,
-    button::{Button, ButtonVariants},
-    input::{Input, InputEvent, InputState},
-};
+use gpui_kit::component::input::{Input, InputEvent, InputState};
 use gpui_kit::{
     AppContext, Context, Entity, IntoElement, ParentElement, Render, SharedString, Styled,
     Subscription, Window, div, px,
 };
 use malmoon_core::caption::CaptionBuffer;
 use malmoon_tokens as tokens;
-use malmoon_ui::{CaptionStream, color};
+use malmoon_ui::{ButtonVariant, CaptionStream, ControlSize, TypographyExt, button, color};
 
 use crate::session::{Command, Handle, SessionEvent};
 
@@ -123,7 +119,7 @@ impl Render for Prompter {
             .flex()
             .items_center()
             .gap(px(tokens::SPACE_2))
-            .text_size(px(tokens::FONT_SIZE_XS))
+            .typography(tokens::TYPOGRAPHY_DETAIL)
             .text_color(color(colors.overlay_text_draft))
             .child(
                 div()
@@ -135,19 +131,18 @@ impl Render for Prompter {
             .child(div().flex_1().truncate().child(status_text))
             .children(signed_in.then(|| {
                 let commands = self.commands.clone();
-                Button::new("sign-out")
-                    .ghost()
-                    .xsmall()
-                    .label("로그아웃")
-                    .on_click(move |_, _, _| {
-                        let _ = commands.send(Command::SignOut);
-                    })
+                button(
+                    "sign-out",
+                    "로그아웃",
+                    ButtonVariant::Ghost,
+                    ControlSize::Sm,
+                )
+                .on_click(move |_, _, _| {
+                    let _ = commands.send(Command::SignOut);
+                })
             }))
             .child(
-                Button::new("quit")
-                    .ghost()
-                    .xsmall()
-                    .label("종료")
+                button("quit", "종료", ButtonVariant::Ghost, ControlSize::Sm)
                     .on_click(|_, _, cx| cx.quit()),
             );
 
@@ -161,12 +156,15 @@ impl Render for Prompter {
                 .text_color(color(colors.overlay_text_draft))
                 .child("자막을 보려면 로그인하세요. 브라우저가 열립니다.")
                 .child(
-                    Button::new("sign-in")
-                        .primary()
-                        .label("브라우저에서 로그인")
-                        .on_click(move |_, _, _| {
-                            let _ = commands.send(Command::SignIn);
-                        }),
+                    button(
+                        "sign-in",
+                        "브라우저에서 로그인",
+                        ButtonVariant::Primary,
+                        ControlSize::Md,
+                    )
+                    .on_click(move |_, _, _| {
+                        let _ = commands.send(Command::SignIn);
+                    }),
                 )
                 .into_any_element()
         } else if self.captions.is_empty() {

@@ -208,6 +208,9 @@ importers:
       '@malmoon/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
+      '@malmoon/ui-native':
+        specifier: workspace:*
+        version: link:../../packages/ui-native
       expo:
         specifier: ~58.0.24
         version: 58.0.24(@babel/core@7.29.13(supports-color@8.1.1))(@expo/metro-runtime@58.0.17)(expo-router@58.0.31)(react-dom@19.3.0(react@19.3.0))(react-native-worklets@0.13.1(@babel/core@7.29.13(supports-color@8.1.1))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(react-native@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(supports-color@8.1.1))(react-native@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(supports-color@8.1.1)(typescript@7.1.0-beta)
@@ -254,12 +257,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@heroui/react':
-        specifier: ^3.2.7
-        version: 3.2.7(@internationalized/date@3.12.4)(@react-aria/ssr@3.10.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@react-aria/utils@3.34.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@react-spectrum/provider@3.11.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-aria-components@1.22.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-aria@3.53.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.5)
-      '@heroui/styles':
-        specifier: ^3.2.7
-        version: 3.2.7(tailwindcss@4.3.5)
       '@malmoon/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -269,6 +266,9 @@ importers:
       '@malmoon/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
+      '@malmoon/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       react:
         specifier: 'catalog:'
         version: 19.3.0
@@ -324,6 +324,53 @@ importers:
 
   packages/tokens:
     devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 7.1.0-beta
+
+  packages/ui:
+    dependencies:
+      '@heroui/react':
+        specifier: ^3.2.7
+        version: 3.2.7(@internationalized/date@3.12.4)(@react-aria/ssr@3.10.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@react-aria/utils@3.34.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@react-spectrum/provider@3.11.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-aria-components@1.22.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-aria@3.53.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.5)
+      '@heroui/styles':
+        specifier: ^3.2.7
+        version: 3.2.7(tailwindcss@4.3.5)
+      '@malmoon/tokens':
+        specifier: workspace:*
+        version: link:../tokens
+    devDependencies:
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.3.0
+      react:
+        specifier: 'catalog:'
+        version: 19.3.0
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.3.0(react@19.3.0)
+      tailwindcss:
+        specifier: ^4.3.5
+        version: 4.3.5
+      typescript:
+        specifier: 'catalog:'
+        version: 7.1.0-beta
+
+  packages/ui-native:
+    dependencies:
+      '@malmoon/tokens':
+        specifier: workspace:*
+        version: link:../tokens
+    devDependencies:
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.3.0
+      react:
+        specifier: 'catalog:'
+        version: 19.3.0
+      react-native:
+        specifier: 0.88.1
+        version: 0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1)
       typescript:
         specifier: 'catalog:'
         version: 7.1.0-beta

@@ -10,17 +10,80 @@ export const colors = {
     "overlayTextUncertain": "#ffd479",
     "backgroundBase": "#ffffff",
     "backgroundSurface": "#f5f5f7",
-    "textPrimary": "#16161a",
+    "backgroundRaised": "#ffffff",
+    "backgroundDisabled": "#ececf0",
+    "textPrimary": "#18181c",
     "textSecondary": "#5c5c66",
+    "textDisabled": "#a9a9b4",
+    "textAccent": "#4f46e5",
     "textOnAccent": "#ffffff",
+    "textOnDanger": "#ffffff",
     "borderDefault": "#e2e2e8",
+    "borderStrong": "#84848f",
+    "borderFocus": "#4f46e5",
     "accentDefault": "#4f46e5",
-    "statusDanger": "#d92d20",
+    "accentHover": "#4338ca",
+    "accentPressed": "#3730a3",
+    "accentSubtle": "#eef2ff",
+    "controlDefault": "#ececf0",
+    "controlHover": "#e2e2e8",
+    "controlPressed": "#c9c9d1",
+    "dangerDefault": "#d92d20",
+    "dangerHover": "#b42318",
+    "dangerPressed": "#912018",
+    "statusDanger": "#b42318",
+    "statusDangerSubtle": "#fef3f2",
     "statusSuccess": "#067647",
+    "statusSuccessSubtle": "#ecfdf3",
     "statusWarning": "#b54708",
+    "statusWarningSubtle": "#fffaeb",
+    "statusInfo": "#175cd3",
+    "statusInfoSubtle": "#eff8ff",
     "dataPathStandard": "#3b5bdb",
     "dataPathZeroRetention": "#0b7285",
-    "dataPathConfidential": "#862e9c"
+    "dataPathConfidential": "#862e9c",
+    "buttonPrimaryBackground": "#4f46e5",
+    "buttonPrimaryBackgroundHover": "#4338ca",
+    "buttonPrimaryBackgroundPressed": "#3730a3",
+    "buttonPrimaryText": "#ffffff",
+    "buttonSecondaryBackground": "#ececf0",
+    "buttonSecondaryBackgroundHover": "#e2e2e8",
+    "buttonSecondaryBackgroundPressed": "#c9c9d1",
+    "buttonSecondaryText": "#18181c",
+    "buttonGhostBackgroundHover": "#ececf0",
+    "buttonGhostBackgroundPressed": "#e2e2e8",
+    "buttonGhostText": "#18181c",
+    "buttonDangerBackground": "#d92d20",
+    "buttonDangerBackgroundHover": "#b42318",
+    "buttonDangerBackgroundPressed": "#912018",
+    "buttonDangerText": "#ffffff",
+    "buttonDisabledBackground": "#ececf0",
+    "buttonDisabledText": "#a9a9b4",
+    "fieldBackground": "#ffffff",
+    "fieldBorder": "#84848f",
+    "fieldBorderFocus": "#4f46e5",
+    "fieldBorderInvalid": "#b42318",
+    "fieldText": "#18181c",
+    "fieldPlaceholder": "#5c5c66",
+    "badgeNeutralBackground": "#ececf0",
+    "badgeNeutralText": "#5c5c66",
+    "badgeAccentBackground": "#eef2ff",
+    "badgeAccentText": "#4f46e5",
+    "badgeSuccessBackground": "#ecfdf3",
+    "badgeSuccessText": "#067647",
+    "badgeWarningBackground": "#fffaeb",
+    "badgeWarningText": "#b54708",
+    "badgeDangerBackground": "#fef3f2",
+    "badgeDangerText": "#b42318",
+    "bannerSuccessBackground": "#ecfdf3",
+    "bannerSuccessAccent": "#067647",
+    "bannerWarningBackground": "#fffaeb",
+    "bannerWarningAccent": "#b54708",
+    "bannerDangerBackground": "#fef3f2",
+    "bannerDangerAccent": "#b42318",
+    "bannerInfoBackground": "#eff8ff",
+    "bannerInfoAccent": "#175cd3",
+    "bannerText": "#18181c"
   },
   "dark": {
     "overlaySurface": "rgba(16, 16, 20, 0.72)",
@@ -30,17 +93,80 @@ export const colors = {
     "overlayTextUncertain": "#ffd479",
     "backgroundBase": "#0e0e11",
     "backgroundSurface": "#18181c",
-    "textPrimary": "#f2f2f5",
+    "backgroundRaised": "#222228",
+    "backgroundDisabled": "#2c2c33",
+    "textPrimary": "#f5f5f7",
     "textSecondary": "#a9a9b4",
+    "textDisabled": "#5c5c66",
+    "textAccent": "#a5b4fc",
     "textOnAccent": "#ffffff",
+    "textOnDanger": "#ffffff",
     "borderDefault": "#2c2c33",
+    "borderStrong": "#84848f",
+    "borderFocus": "#818cf8",
     "accentDefault": "#5b5ef0",
+    "accentHover": "#4f46e5",
+    "accentPressed": "#4338ca",
+    "accentSubtle": "#1e1b4b",
+    "controlDefault": "#2c2c33",
+    "controlHover": "#44444c",
+    "controlPressed": "#5c5c66",
+    "dangerDefault": "#d92d20",
+    "dangerHover": "#b42318",
+    "dangerPressed": "#912018",
     "statusDanger": "#f97066",
+    "statusDangerSubtle": "#55160c",
     "statusSuccess": "#47cd89",
+    "statusSuccessSubtle": "#053321",
     "statusWarning": "#fdb022",
+    "statusWarningSubtle": "#4e1d09",
+    "statusInfo": "#53b1fd",
+    "statusInfoSubtle": "#102a56",
     "dataPathStandard": "#8da2fb",
     "dataPathZeroRetention": "#66d9e8",
-    "dataPathConfidential": "#e599f7"
+    "dataPathConfidential": "#e599f7",
+    "buttonPrimaryBackground": "#5b5ef0",
+    "buttonPrimaryBackgroundHover": "#4f46e5",
+    "buttonPrimaryBackgroundPressed": "#4338ca",
+    "buttonPrimaryText": "#ffffff",
+    "buttonSecondaryBackground": "#2c2c33",
+    "buttonSecondaryBackgroundHover": "#44444c",
+    "buttonSecondaryBackgroundPressed": "#5c5c66",
+    "buttonSecondaryText": "#f5f5f7",
+    "buttonGhostBackgroundHover": "#2c2c33",
+    "buttonGhostBackgroundPressed": "#44444c",
+    "buttonGhostText": "#f5f5f7",
+    "buttonDangerBackground": "#d92d20",
+    "buttonDangerBackgroundHover": "#b42318",
+    "buttonDangerBackgroundPressed": "#912018",
+    "buttonDangerText": "#ffffff",
+    "buttonDisabledBackground": "#2c2c33",
+    "buttonDisabledText": "#5c5c66",
+    "fieldBackground": "#0e0e11",
+    "fieldBorder": "#84848f",
+    "fieldBorderFocus": "#818cf8",
+    "fieldBorderInvalid": "#f97066",
+    "fieldText": "#f5f5f7",
+    "fieldPlaceholder": "#a9a9b4",
+    "badgeNeutralBackground": "#2c2c33",
+    "badgeNeutralText": "#a9a9b4",
+    "badgeAccentBackground": "#1e1b4b",
+    "badgeAccentText": "#a5b4fc",
+    "badgeSuccessBackground": "#053321",
+    "badgeSuccessText": "#47cd89",
+    "badgeWarningBackground": "#4e1d09",
+    "badgeWarningText": "#fdb022",
+    "badgeDangerBackground": "#55160c",
+    "badgeDangerText": "#f97066",
+    "bannerSuccessBackground": "#053321",
+    "bannerSuccessAccent": "#47cd89",
+    "bannerWarningBackground": "#4e1d09",
+    "bannerWarningAccent": "#fdb022",
+    "bannerDangerBackground": "#55160c",
+    "bannerDangerAccent": "#f97066",
+    "bannerInfoBackground": "#102a56",
+    "bannerInfoAccent": "#53b1fd",
+    "bannerText": "#f5f5f7"
   }
 } as const;
 
@@ -50,7 +176,8 @@ export const space = {
   "3": 12,
   "4": 16,
   "6": 24,
-  "8": 32
+  "8": 32,
+  "12": 48
 } as const;
 
 export const radius = {
@@ -58,6 +185,18 @@ export const radius = {
   "md": 10,
   "lg": 16,
   "full": 9999
+} as const;
+
+export const border = {
+  "width": {
+    "thin": 1,
+    "thick": 2
+  }
+} as const;
+
+export const focus = {
+  "width": 2,
+  "offset": 2
 } as const;
 
 export const font = {
@@ -72,10 +211,11 @@ export const font = {
   },
   "size": {
     "xs": 12,
-    "sm": 13,
-    "md": 15,
+    "sm": 14,
+    "md": 16,
     "lg": 18,
     "xl": 22,
+    "2xl": 28,
     "caption": 20
   },
   "weight": {
@@ -85,7 +225,65 @@ export const font = {
   },
   "lineHeight": {
     "tight": 1.25,
+    "snug": 1.4,
     "normal": 1.5
+  }
+} as const;
+
+export const typography = {
+  "display": {
+    "fontSize": 28,
+    "lineHeight": 35,
+    "fontWeight": 700,
+    "letterSpacing": -0.3
+  },
+  "title": {
+    "fontSize": 22,
+    "lineHeight": 28,
+    "fontWeight": 700,
+    "letterSpacing": -0.2
+  },
+  "heading": {
+    "fontSize": 18,
+    "lineHeight": 25,
+    "fontWeight": 600,
+    "letterSpacing": 0
+  },
+  "body": {
+    "fontSize": 16,
+    "lineHeight": 24,
+    "fontWeight": 400,
+    "letterSpacing": 0
+  },
+  "bodyStrong": {
+    "fontSize": 16,
+    "lineHeight": 24,
+    "fontWeight": 600,
+    "letterSpacing": 0
+  },
+  "label": {
+    "fontSize": 14,
+    "lineHeight": 20,
+    "fontWeight": 600,
+    "letterSpacing": 0
+  },
+  "detail": {
+    "fontSize": 14,
+    "lineHeight": 21,
+    "fontWeight": 400,
+    "letterSpacing": 0
+  },
+  "footnote": {
+    "fontSize": 12,
+    "lineHeight": 17,
+    "fontWeight": 600,
+    "letterSpacing": 0
+  },
+  "caption": {
+    "fontSize": 20,
+    "lineHeight": 25,
+    "fontWeight": 600,
+    "letterSpacing": 0
   }
 } as const;
 
@@ -101,17 +299,52 @@ export const motion = {
       0,
       0,
       1
+    ],
+    "enter": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "exit": [
+      0.3,
+      0,
+      1,
+      1
     ]
   },
   "captionConfirm": 200
 } as const;
 
 export const shadow = {
+  "raised": {
+    "color": "rgba(0, 0, 0, 0.12)",
+    "offsetX": 0,
+    "offsetY": 4,
+    "blur": 16,
+    "spread": 0
+  },
   "overlay": {
     "color": "rgba(0, 0, 0, 0.35)",
     "offsetX": 0,
-    "offsetY": 8,
-    "blur": 24,
+    "offsetY": 12,
+    "blur": 32,
     "spread": 0
+  }
+} as const;
+
+/** Control sizes by input device: `pointer` for a mouse, `touch` for fingers. */
+export const size = {
+  "pointer": {
+    "controlSm": 28,
+    "controlMd": 36,
+    "controlLg": 44,
+    "targetMin": 24
+  },
+  "touch": {
+    "controlSm": 40,
+    "controlMd": 48,
+    "controlLg": 56,
+    "targetMin": 48
   }
 } as const;

@@ -6,7 +6,12 @@
 #![forbid(unsafe_code)]
 
 mod caption_stream;
+mod components;
 mod theme;
 
 pub use caption_stream::CaptionStream;
-pub use theme::{color, font, init};
+pub use components::{
+    Badge, BadgeTone, Banner, BannerTone, ButtonVariant, ControlSize, TextField, button, card,
+    divider, text,
+};
+pub use theme::{TypographyExt, color, font, init, mode, palette, set_mode};

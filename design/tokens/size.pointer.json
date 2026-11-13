@@ -1,0 +1,33 @@
+{
+  "size": {
+    "$type": "dimension",
+    "$description": "Control heights for a mouse or trackpad. WCAG 2.2 asks for targets of at least 24px.",
+    "control": {
+      "sm": {
+        "$value": {
+          "value": 28,
+          "unit": "px"
+        }
+      },
+      "md": {
+        "$value": {
+          "value": 36,
+          "unit": "px"
+        }
+      },
+      "lg": {
+        "$value": {
+          "value": 44,
+          "unit": "px"
+        }
+      }
+    },
+    "target-min": {
+      "$value": {
+        "value": 24,
+        "unit": "px"
+      },
+      "$description": "The smallest area that reacts to a press, whatever the control looks like."
+    }
+  }
+}

@@ -52,7 +52,14 @@
 - [shadcn/ui](https://ui.shadcn.com/), [React Native Reusables](https://github.com/founded-labs/react-native-reusables), [Tamagui](https://tamagui.dev/), [gluestack-ui](https://gluestack.io/)
 - [DTCG 디자인 토큰 형식 2025.10](https://www.w3.org/community/reports/design-tokens/CG-FINAL-format-20251028/)
 - [Terrazzo](https://terrazzo.app/docs/), [Style Dictionary](https://styledictionary.com/)
-- [Pretendard](https://github.com/orioncactus/pretendard)
+- [Pretendard](https://github.com/orioncactus/pretendard). SIL Open Font License 1.1
+- [WCAG 2.2](https://www.w3.org/TR/WCAG22/): 1.4.1, 1.4.3, 1.4.4, 1.4.11, 2.4.7, 2.4.13, 2.5.8
+- [DTCG 형식 모듈 2025.10](https://www.designtokens.org/tr/2025.10/format/), [Resolver 모듈 2025.10](https://www.designtokens.org/tr/2025.10/resolver/)
+- [Apple 디자인 팁](https://developer.apple.com/design/tips/): 누르는 영역 44pt. Human Interface Guidelines 본문은 읽지 못했다
+- [Material Design 3 토큰](https://m3.material.io/foundations/design-tokens), [구조](https://m3.material.io/foundations/designing/structure): 토큰의 세 층, 누르는 영역 48dp. 검색 요약으로 확인했다
+- [Primer 토큰 이름](https://primer.style/product/primitives/token-names/): base, functional, component
+- [MDN의 pointer 미디어 기능](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/pointer)
+- HeroUI의 테마 변수와 컴포넌트 클래스는 설치된 `@heroui/styles` 3.2.7의 소스에서, GPUI Component의 테마 필드는 `gpui-component` 0.9.1의 소스에서 읽었다
 - [React Native 텍스트 문서](https://reactnative.dev/docs/text)
 
 ## 확인하지 못한 것
@@ -63,6 +70,8 @@
 - GPUI 오버레이가 다른 앱의 전체 화면 위에 실제로 표시되는지 (창 설정값은 실행해 확인했고, 전체 화면 회의 앱 위에서는 보지 않았다)
 - GPUI 오버레이의 Windows 동작
 - HeroUI와 HeroUI Native가 같은 테마 파일과 같은 컴포넌트 API를 쓰는지
+- 16px보다 작은 입력 칸에서 iOS Safari가 페이지를 확대하는 동작의 공식 문서
+- Material Design 3과 Apple Human Interface Guidelines의 본문 (페이지를 읽지 못해 요약으로 확인했다)
 - HeroUI Pro와 Uniwind Pro의 유료 범위
-- 모바일 앱의 기기 실행 (번들링까지만 확인했다)
+- 모바일 앱의 실제 기기와 Android 실행 (iOS 시뮬레이터에서 갤러리와 로그인 화면만 봤다)
 - Iced, Slint, egui의 글자 품질과 성능 (문서와 소스만 읽었다)

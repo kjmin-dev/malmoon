@@ -60,10 +60,10 @@ fn wrap(
 impl RenderOnce for CaptionStream {
     fn render(self, window: &mut Window, _cx: &mut App) -> impl IntoElement {
         let colors = tokens::colors(tokens::Mode::Dark);
-        let caption_font = font(tokens::FONT_WEIGHT_SEMIBOLD);
-        let caption_size = px(tokens::FONT_SIZE_CAPTION);
-        let translation_font = font(tokens::FONT_WEIGHT_REGULAR);
-        let translation_size = px(tokens::FONT_SIZE_MD);
+        let caption_font = font(tokens::TYPOGRAPHY_CAPTION.weight);
+        let caption_size = px(tokens::TYPOGRAPHY_CAPTION.size);
+        let translation_font = font(tokens::TYPOGRAPHY_BODY.weight);
+        let translation_size = px(tokens::TYPOGRAPHY_BODY.size);
 
         div()
             .flex()

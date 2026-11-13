@@ -3,6 +3,7 @@
 // Style Dictionary does the parsing and alias resolution. Everything platform-specific happens in
 // emit.ts, so a value that some platform cannot express is rejected here, once, for all of them.
 
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import StyleDictionary from "style-dictionary";
 
@@ -20,6 +21,15 @@ export type Shadow = {
   spread: number;
 };
 
+/** A text style. `lineHeight` is a multiple of the size, as in the token files. */
+export type Typography = {
+  families: string[];
+  sizePx: number;
+  weight: number;
+  lineHeight: number;
+  letterSpacingPx: number;
+};
+
 export type Value =
   | { kind: "dimension"; px: number }
   | { kind: "duration"; ms: number }
@@ -27,15 +37,24 @@ export type Value =
   | { kind: "fontWeight"; value: number }
   | { kind: "fontFamily"; families: string[] }
   | { kind: "cubicBezier"; points: [number, number, number, number] }
-  | { kind: "shadow"; shadow: Shadow };
+  | { kind: "shadow"; shadow: Shadow }
+  | { kind: "typography"; typography: Typography };
+
+/** How the person points at the screen. Sizes differ between the two; nothing else does. */
+export type InputMode = "pointer" | "touch";
+export const INPUT_MODES: readonly InputMode[] = ["pointer", "touch"];
 
 export type ColorToken = { path: string[]; description?: string; light: Rgba; dark: Rgba };
 export type ValueToken = { path: string[]; description?: string; value: Value };
+/** A length that depends on the input mode, in pixels. */
+export type SizeToken = { path: string[]; description?: string; pointer: number; touch: number };
 
 export type Model = {
   /** Paths are relative to the top-level `color` group. */
   colors: ColorToken[];
   values: ValueToken[];
+  /** Paths are relative to the top-level `size` group. */
+  sizes: SizeToken[];
 };
 
 type RawToken = { path: string[]; $type?: string; $value: unknown; $description?: string };
@@ -130,14 +149,43 @@ function parseValue(token: RawToken): Value {
         },
       };
     }
+    case "typography": {
+      if (!isRecord(value)) fail(path, "a typography token must be an object");
+      const part = ($type: string, key: string) =>
+        parseValue({ path: [...path, key], $type, $value: value[key] });
+      const family = part("fontFamily", "fontFamily");
+      const size = part("dimension", "fontSize");
+      const weight = part("fontWeight", "fontWeight");
+      const lineHeight = part("number", "lineHeight");
+      const spacing = part("dimension", "letterSpacing");
+      if (
+        family.kind !== "fontFamily" ||
+        size.kind !== "dimension" ||
+        weight.kind !== "fontWeight" ||
+        lineHeight.kind !== "number" ||
+        spacing.kind !== "dimension"
+      ) {
+        return fail(path, "a typography token is malformed");
+      }
+      return {
+        kind: "typography",
+        typography: {
+          families: family.families,
+          sizePx: size.px,
+          weight: weight.value,
+          lineHeight: lineHeight.value,
+          letterSpacingPx: spacing.px,
+        },
+      };
+    }
     default:
       return fail(path, `token type "${String(token.$type)}" is not supported`);
   }
 }
 
-async function loadMode(tokensDir: string, mode: Mode): Promise<RawToken[]> {
+async function loadFiles(tokensDir: string, files: string[]): Promise<RawToken[]> {
   const dictionary = new StyleDictionary({
-    source: [join(tokensDir, "base.json"), join(tokensDir, `color.${mode}.json`)],
+    source: files.map((file) => join(tokensDir, file)).filter((file) => existsSync(file)),
     usesDtcg: true,
     log: { warnings: "error", verbosity: "default" },
     // No transforms: the emitters need the resolved DTCG values, not CSS strings.
@@ -147,39 +195,67 @@ async function loadMode(tokensDir: string, mode: Mode): Promise<RawToken[]> {
   return allTokens as unknown as RawToken[];
 }
 
-export async function loadModel(tokensDir: string): Promise<Model> {
-  const [light, dark] = await Promise.all(MODES.map((mode) => loadMode(tokensDir, mode)));
-  if (!light || !dark) throw new TokenError("both color modes must load");
+/** Pairs up a token set that exists once per mode, and insists that both modes define it. */
+function pairUp<M extends string>(
+  [first, second]: readonly [M, M],
+  sets: readonly [RawToken[], RawToken[]],
+  each: (token: RawToken, counterpart: RawToken) => void,
+): void {
+  const others = new Map(sets[1].map((token) => [token.path.join("."), token]));
+  for (const token of sets[0]) {
+    const key = token.path.join(".");
+    const counterpart = others.get(key);
+    if (!counterpart) fail(token.path, `is defined for ${first} mode but not for ${second} mode`);
+    others.delete(key);
+    each(token, counterpart);
+  }
+  for (const token of others.values()) {
+    fail(token.path, `is defined for ${second} mode but not for ${first} mode`);
+  }
+}
 
-  const darkByPath = new Map(dark.map((token) => [token.path.join("."), token]));
+export async function loadModel(tokensDir: string): Promise<Model> {
+  // The palette is loaded so that the color files can refer to it, and then left out: only
+  // colors with a meaning reach the platforms.
+  const colorFiles = (mode: Mode) => ["palette.json", "base.json", `color.${mode}.json`];
+  const [light, dark, pointer, touch] = await Promise.all([
+    loadFiles(tokensDir, colorFiles("light")),
+    loadFiles(tokensDir, colorFiles("dark")),
+    loadFiles(tokensDir, ["size.pointer.json"]),
+    loadFiles(tokensDir, ["size.touch.json"]),
+  ]);
+
   const colors: ColorToken[] = [];
   const values: ValueToken[] = [];
-
-  for (const token of light) {
-    const key = token.path.join(".");
-    const counterpart = darkByPath.get(key);
-    if (!counterpart) fail(token.path, "is defined for light mode but not for dark mode");
-    darkByPath.delete(key);
-
-    const description = token.$description;
-    if (token.$type === "color") {
+  pairUp(["light", "dark"], [light, dark], (token, counterpart) => {
+    const description = token.$description ? { description: token.$description } : {};
+    if (token.path[0] === "palette") {
+      // Checked even though it is not emitted: a bad ramp value would surface as a bad alias.
+      parseColor(token.path, token.$value);
+    } else if (token.$type === "color") {
       if (token.path[0] !== "color") fail(token.path, 'color tokens must live under "color"');
       colors.push({
         path: token.path.slice(1),
-        ...(description ? { description } : {}),
+        ...description,
         light: parseColor(token.path, token.$value),
         dark: parseColor(token.path, counterpart.$value),
       });
     } else {
-      values.push({
-        path: token.path,
-        ...(description ? { description } : {}),
-        value: parseValue(token),
-      });
+      values.push({ path: token.path, ...description, value: parseValue(token) });
     }
-  }
-  for (const token of darkByPath.values()) {
-    fail(token.path, "is defined for dark mode but not for light mode");
-  }
-  return { colors, values };
+  });
+
+  const sizes: SizeToken[] = [];
+  pairUp(["pointer", "touch"], [pointer, touch], (token, counterpart) => {
+    if (token.path[0] !== "size" || token.$type !== "dimension") {
+      fail(token.path, 'the size files hold dimensions under "size" and nothing else');
+    }
+    sizes.push({
+      path: token.path.slice(1),
+      ...(token.$description ? { description: token.$description } : {}),
+      pointer: parseUnit(token.path, token.$value, "px", "a size"),
+      touch: parseUnit(token.path, counterpart.$value, "px", "a size"),
+    });
+  });
+  return { colors, values, sizes };
 }

@@ -9,11 +9,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@heroui/react": "^3.2.7",
-    "@heroui/styles": "^3.2.7",
     "@malmoon/auth": "workspace:*",
     "@malmoon/session": "workspace:*",
     "@malmoon/tokens": "workspace:*",
+    "@malmoon/ui": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:"
   },

@@ -14,9 +14,19 @@ const srgb = (components: number[], extra: object = {}) => ({
   $value: { colorSpace: "srgb", components, ...extra },
 });
 
-/** Writes a minimal token set, with `base` merged into base.json, and loads it. */
-async function loadWith(base: object, dark: object = { color: { ink: srgb([1, 1, 1]) } }) {
+/**
+ * Writes a minimal token set, with `base` as base.json, and loads it. `extra` adds more files,
+ * such as the palette or the size files.
+ */
+async function loadWith(
+  base: object,
+  dark: object = { color: { ink: srgb([1, 1, 1]) } },
+  extra: Record<string, object> = {},
+) {
   const dir = await mkdtemp(join(tmpdir(), "malmoon-tokens-"));
+  for (const [name, content] of Object.entries(extra)) {
+    await writeFile(join(dir, name), JSON.stringify(content));
+  }
   await writeFile(join(dir, "base.json"), JSON.stringify(base));
   await writeFile(
     join(dir, "color.light.json"),
@@ -40,7 +50,8 @@ test("a low-contrast pairing is reported with its mode", async () => {
       : token,
   );
   const failures = checkContrast({ ...model, colors });
-  assert.equal(failures.length, 2);
+  // Every pairing that draws secondary text fails, and only in the mode that was changed.
+  assert.ok(failures.length > 0 && failures.every((failure) => failure.includes("(light)")));
   assert.match(failures[0] ?? "", /^text\.secondary on background\.base \(light\): 1\.14:1/);
 });
 
@@ -98,6 +109,68 @@ test("a color missing from one mode is rejected", async () => {
   );
 });
 
+test("palette colors resolve through aliases but are not emitted", async () => {
+  const palette = { palette: { ink: { 900: srgb([0, 0, 0]) } } };
+  const base = { color: { text: { $type: "color", $value: "{palette.ink.900}" } } };
+  const model = await loadWith(base, undefined, { "palette.json": palette });
+  assert.deepEqual(
+    model.colors.map((token) => token.path.join(".")),
+    ["text", "ink"],
+  );
+  assert.deepEqual(model.colors[0]?.light, { r: 0, g: 0, b: 0, a: 1 });
+  assert.doesNotMatch(emitCss(model) + emitTypeScript(model) + emitRust(model), /palette/i);
+});
+
+test("the committed palette never reaches the generated files", async () => {
+  const model = await loadModel(tokensDir);
+  assert.equal(
+    model.colors.some((token) => token.path[0] === "palette"),
+    false,
+  );
+});
+
+const px = (value: number) => ({ $type: "dimension", $value: { value, unit: "px" } });
+
+test("a size must exist for both input modes", async () => {
+  await assert.rejects(
+    loadWith({}, undefined, {
+      "size.pointer.json": { size: { control: px(36) } },
+      "size.touch.json": { size: {} },
+    }),
+    /size\.control: is defined for pointer mode but not for touch mode/,
+  );
+});
+
+test("a typography token resolves its parts", async () => {
+  const base = {
+    font: { size: { md: px(16) }, weight: { bold: { $type: "fontWeight", $value: 700 } } },
+    typography: {
+      title: {
+        $type: "typography",
+        $value: {
+          fontFamily: ["Pretendard", "sans-serif"],
+          fontSize: "{font.size.md}",
+          fontWeight: "{font.weight.bold}",
+          lineHeight: 1.25,
+          letterSpacing: { value: -0.2, unit: "px" },
+        },
+      },
+    },
+  };
+  const model = await loadWith(base);
+  const title = model.values.find((token) => token.path.join(".") === "typography.title");
+  assert.deepEqual(title?.value, {
+    kind: "typography",
+    typography: {
+      families: ["Pretendard", "sans-serif"],
+      sizePx: 16,
+      weight: 700,
+      lineHeight: 1.25,
+      letterSpacingPx: -0.2,
+    },
+  });
+});
+
 const sample: Model = {
   colors: [
     {
@@ -116,7 +189,22 @@ const sample: Model = {
     { path: ["radius", "md"], value: { kind: "dimension", px: 10 } },
     { path: ["font", "line-height", "tight"], value: { kind: "number", value: 1.25 } },
     { path: ["motion", "duration", "fast"], value: { kind: "duration", ms: 120 } },
+    { path: ["font", "size", "md"], value: { kind: "dimension", px: 16 } },
+    {
+      path: ["typography", "body"],
+      value: {
+        kind: "typography",
+        typography: {
+          families: ["Pretendard"],
+          sizePx: 15,
+          weight: 400,
+          lineHeight: 1.5,
+          letterSpacingPx: 0,
+        },
+      },
+    },
   ],
+  sizes: [{ path: ["control", "md"], pointer: 36, touch: 48 }],
 };
 
 test("CSS follows the color scheme only where the modes differ", () => {
@@ -126,12 +214,25 @@ test("CSS follows the color scheme only where the modes differ", () => {
   assert.match(css, /--mm-radius-md: 10px;/);
 });
 
+test("CSS switches sizes on the input device and spells out text styles", () => {
+  const css = emitCss(sample);
+  assert.match(css, /:root \{[^}]*--mm-size-control-md: 36px;/);
+  assert.match(css, /@media \(pointer: coarse\) \{\n {2}:root \{\n {4}--mm-size-control-md: 48px;/);
+  assert.match(css, /--mm-typography-body-size: 15px;\n {2}--mm-typography-body-weight: 400;/);
+  assert.match(css, /--mm-typography-body-line-height: 1\.5;/);
+});
+
 test("the Tailwind theme is namespaced and skips groups without a utility", () => {
   const theme = emitTailwind(sample);
   assert.match(theme, /--color-mm-overlay-surface: var\(--mm-color-overlay-surface\);/);
   assert.match(theme, /--radius-mm-md: var\(--mm-radius-md\);/);
   assert.match(theme, /--leading-mm-tight: var\(--mm-font-line-height-tight\);/);
   assert.doesNotMatch(theme, /duration/);
+  // A text role is one utility; a raw font size is none.
+  assert.match(theme, /--text-mm-body: var\(--mm-typography-body-size\);/);
+  assert.match(theme, /--text-mm-body--line-height: var\(--mm-typography-body-line-height\);/);
+  assert.doesNotMatch(theme, /--text-mm-md/);
+  assert.match(theme, /--spacing-mm-control-md: var\(--mm-size-control-md\);/);
 });
 
 test("TypeScript uses camelCase keys and plain numbers", () => {
@@ -139,6 +240,9 @@ test("TypeScript uses camelCase keys and plain numbers", () => {
   assert.match(source, /"textOnAccent": "rgba\(16, 16, 20, 0\.5\)"/);
   assert.match(source, /export const font = \{\n {2}"lineHeight": \{\n {4}"tight": 1\.25/);
   assert.match(source, /"fast": 120/);
+  // React Native wants the line height in pixels: 15 * 1.5, rounded.
+  assert.match(source, /"body": \{\n {4}"fontSize": 15,\n {4}"lineHeight": 23,/);
+  assert.match(source, /export const size = \{\n {2}"pointer": \{\n {4}"controlMd": 36/);
 });
 
 test("Rust gets one struct field per color and typed constants", () => {
@@ -147,4 +251,6 @@ test("Rust gets one struct field per color and typed constants", () => {
   assert.match(source, /text_on_accent: Color::rgba\(16, 16, 20, 0\.5\),/);
   assert.match(source, /pub const RADIUS_MD: f32 = 10\.0;/);
   assert.match(source, /pub const MOTION_DURATION_FAST: Duration = Duration::from_millis\(120\);/);
+  assert.match(source, /pub const TYPOGRAPHY_BODY: Typography = Typography \{ size: 15\.0, /);
+  assert.match(source, /pub const TOUCH: Sizes = Sizes \{\n {4}control_md: 48\.0,/);
 });

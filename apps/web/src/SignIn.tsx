@@ -1,6 +1,12 @@
-import { Button, Card, FieldError, Input, Label, Separator, TextField } from "@heroui/react";
-import type { Account, EmailChallenge, Provider, SocialProvider } from "@malmoon/auth";
-import { errorMessage, PROVIDER_NAME } from "@malmoon/auth";
+import {
+  type Account,
+  type EmailChallenge,
+  errorMessage,
+  PROVIDER_NAME,
+  type Provider,
+  type SocialProvider,
+} from "@malmoon/auth";
+import { Button, Card, Divider, TextField } from "@malmoon/ui";
 import { type FormEvent, useEffect, useState } from "react";
 import { auth, beginOAuth } from "./auth.ts";
 
@@ -54,83 +60,83 @@ export function SignIn({ onSignedIn }: { onSignedIn: (account: Account) => void 
   const social = providers.filter((provider): provider is SocialProvider => provider !== "email");
 
   return (
-    <Card className="mx-auto w-full max-w-sm">
-      <Card.Header>
-        <Card.Title>로그인</Card.Title>
-        <Card.Description>처음이면 계정이 만들어집니다.</Card.Description>
-      </Card.Header>
-      <Card.Content className="flex flex-col gap-4">
-        {step.name === "email" ? (
-          <form className="flex flex-col gap-3" onSubmit={sendCode}>
-            <TextField
-              name="email"
-              type="email"
-              autoComplete="email"
-              isRequired
-              isInvalid={error !== undefined}
-              value={email}
-              onChange={(value) => edit(() => setEmail(value))}
-            >
-              <Label>이메일</Label>
-              <Input placeholder="name@example.com" />
-              <FieldError>{error}</FieldError>
-            </TextField>
-            <Button type="submit" isDisabled={busy} fullWidth>
-              로그인 코드 받기
-            </Button>
-          </form>
-        ) : (
-          <form className="flex flex-col gap-3" onSubmit={verify}>
-            <TextField
-              name="code"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              autoFocus
-              isRequired
-              isInvalid={error !== undefined}
-              value={code}
-              onChange={(value) => edit(() => setCode(value.replace(/\D/g, "").slice(0, 6)))}
-            >
-              <Label>{email}로 보낸 6자리 코드</Label>
-              <Input placeholder="000000" />
-              <FieldError>{error}</FieldError>
-            </TextField>
-            <Button type="submit" isDisabled={busy || code.length !== 6} fullWidth>
-              로그인
-            </Button>
-            <Button
-              variant="ghost"
-              isDisabled={busy}
-              onPress={() => {
-                setStep({ name: "email" });
-                setError(undefined);
-              }}
-              fullWidth
-            >
-              다른 이메일 쓰기
-            </Button>
-          </form>
-        )}
+    <Card
+      title="로그인"
+      description="처음이면 계정이 만들어집니다."
+      className="mx-auto w-full max-w-sm"
+    >
+      {step.name === "email" ? (
+        <form className="flex flex-col gap-3" onSubmit={sendCode}>
+          <TextField
+            label="이메일"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder="name@example.com"
+            required
+            value={email}
+            onChange={(value) => edit(() => setEmail(value))}
+            error={error}
+          />
+          <Button variant="primary" type="submit" loading={busy} fullWidth>
+            로그인 코드 받기
+          </Button>
+        </form>
+      ) : (
+        <form className="flex flex-col gap-3" onSubmit={verify}>
+          <TextField
+            label="로그인 코드"
+            description={`${email}로 보낸 6자리 숫자입니다.`}
+            name="code"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            placeholder="000000"
+            autoFocus
+            required
+            value={code}
+            onChange={(value) => edit(() => setCode(value.replace(/\D/g, "").slice(0, 6)))}
+            error={error}
+          />
+          <Button
+            variant="primary"
+            type="submit"
+            loading={busy}
+            disabled={code.length !== 6}
+            fullWidth
+          >
+            로그인
+          </Button>
+          <Button
+            variant="ghost"
+            disabled={busy}
+            onPress={() => {
+              setStep({ name: "email" });
+              setError(undefined);
+            }}
+            fullWidth
+          >
+            다른 이메일 쓰기
+          </Button>
+        </form>
+      )}
 
-        {social.length > 0 && step.name === "email" && (
-          <>
-            <Separator />
-            <div className="flex flex-col gap-2">
-              {social.map((provider) => (
-                <Button
-                  key={provider}
-                  variant="secondary"
-                  isDisabled={busy}
-                  onPress={() => run(() => beginOAuth(provider))}
-                  fullWidth
-                >
-                  {PROVIDER_NAME[provider]}로 계속하기
-                </Button>
-              ))}
-            </div>
-          </>
-        )}
-      </Card.Content>
+      {social.length > 0 && step.name === "email" && (
+        <>
+          <Divider />
+          <div className="flex flex-col gap-2">
+            {social.map((provider) => (
+              <Button
+                key={provider}
+                disabled={busy}
+                onPress={() => run(() => beginOAuth(provider))}
+                fullWidth
+              >
+                {PROVIDER_NAME[provider]}로 계속하기
+              </Button>
+            ))}
+          </div>
+        </>
+      )}
     </Card>
   );
 }

@@ -1,6 +1,11 @@
-import { Button, Card, Chip } from "@heroui/react";
-import type { Account, Provider, SocialProvider } from "@malmoon/auth";
-import { errorMessage, PROVIDER_NAME } from "@malmoon/auth";
+import {
+  type Account,
+  errorMessage,
+  PROVIDER_NAME,
+  type Provider,
+  type SocialProvider,
+} from "@malmoon/auth";
+import { Badge, Banner, Button, Card, Text } from "@malmoon/ui";
 import { useEffect, useState } from "react";
 import { auth, beginOAuth } from "./auth.ts";
 
@@ -40,13 +45,12 @@ export function AccountCard({
   const onlyOne = account.identities.length === 1;
 
   return (
-    <Card>
-      <Card.Header className="flex-row items-center justify-between">
-        <Card.Title>계정</Card.Title>
+    <Card
+      title="계정"
+      actions={
         <Button
-          variant="secondary"
           size="sm"
-          isDisabled={busy}
+          disabled={busy}
           onPress={() =>
             run(async () => {
               await auth.signOut();
@@ -56,55 +60,49 @@ export function AccountCard({
         >
           로그아웃
         </Button>
-      </Card.Header>
-      <Card.Content className="flex flex-col gap-3">
-        <ul className="flex flex-col gap-2">
-          {account.identities.map((identity) => (
-            <li key={identity.id} className="flex items-center justify-between gap-3">
-              <span className="flex min-w-0 items-center gap-2">
-                <Chip>{PROVIDER_NAME[identity.provider]}</Chip>
-                <span className="truncate text-mm-sm text-muted">
-                  {identity.email ?? identity.display_name ?? ""}
-                </span>
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                // An account always keeps one way in.
-                isDisabled={busy || onlyOne}
-                onPress={() =>
-                  run(async () => {
-                    await auth.unlink(identity.id);
-                    onChange(await auth.account());
-                  })
-                }
-              >
-                연결 해제
-              </Button>
-            </li>
+      }
+    >
+      <ul className="flex flex-col gap-2">
+        {account.identities.map((identity) => (
+          <li key={identity.id} className="flex items-center justify-between gap-3">
+            <span className="flex min-w-0 items-center gap-2">
+              <Badge>{PROVIDER_NAME[identity.provider]}</Badge>
+              <Text variant="detail" tone="secondary" as="span" className="truncate">
+                {identity.email ?? identity.display_name ?? ""}
+              </Text>
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              // An account always keeps one way in.
+              disabled={busy || onlyOne}
+              onPress={() =>
+                run(async () => {
+                  await auth.unlink(identity.id);
+                  onChange(await auth.account());
+                })
+              }
+            >
+              연결 해제
+            </Button>
+          </li>
+        ))}
+      </ul>
+      {linkable.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {linkable.map((provider) => (
+            <Button
+              key={provider}
+              size="sm"
+              disabled={busy}
+              onPress={() => run(() => beginOAuth(provider, { link: true }))}
+            >
+              {PROVIDER_NAME[provider]} 연결
+            </Button>
           ))}
-        </ul>
-        {linkable.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {linkable.map((provider) => (
-              <Button
-                key={provider}
-                variant="secondary"
-                size="sm"
-                isDisabled={busy}
-                onPress={() => run(() => beginOAuth(provider, { link: true }))}
-              >
-                {PROVIDER_NAME[provider]} 연결
-              </Button>
-            ))}
-          </div>
-        )}
-        {error && (
-          <p role="alert" className="text-mm-sm text-danger">
-            {error}
-          </p>
-        )}
-      </Card.Content>
+        </div>
+      )}
+      {error && <Banner tone="danger">{error}</Banner>}
     </Card>
   );
 }
