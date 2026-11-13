@@ -14,6 +14,11 @@ export type SessionOptions = {
   /** The gateway's base URL, for example `ws://127.0.0.1:8787`. */
   url: string;
   client: ClientKind;
+  /**
+   * The session token of the signed-in user, for React Native. Browsers cannot set headers on a
+   * WebSocket and do not need to: they send the session cookie.
+   */
+  token?: string | undefined;
   onEvent: (event: SessionEvent) => void;
 };
 
@@ -29,7 +34,7 @@ const RETRY_MAX_MS = 10_000;
  * Opens a session with the gateway and keeps it open, reconnecting with backoff until `close` is
  * called. Uses the global `WebSocket`, which browsers and React Native both provide.
  */
-export function connectSession({ url, client, onEvent }: SessionOptions): Session {
+export function connectSession({ url, client, token, onEvent }: SessionOptions): Session {
   const endpoint = url.replace(/\/+$/, "") + SESSION_PATH;
   let socket: WebSocket | undefined;
   let retryTimer: ReturnType<typeof setTimeout> | undefined;
@@ -38,7 +43,7 @@ export function connectSession({ url, client, onEvent }: SessionOptions): Sessio
 
   const connect = () => {
     onEvent({ type: "connecting" });
-    const current = new WebSocket(endpoint);
+    const current = token ? openWithToken(endpoint, token) : new WebSocket(endpoint);
     socket = current;
     // The gateway's own explanation, when it sends one before closing.
     let refusal: string | undefined;
@@ -81,4 +86,16 @@ export function connectSession({ url, client, onEvent }: SessionOptions): Sessio
       socket?.close();
     },
   };
+}
+
+/** React Native's WebSocket takes request headers as a third argument. The standard has none. */
+function openWithToken(endpoint: string, token: string): WebSocket {
+  const NativeWebSocket = WebSocket as unknown as new (
+    url: string,
+    protocols: undefined,
+    options: { headers: Record<string, string> },
+  ) => WebSocket;
+  return new NativeWebSocket(endpoint, undefined, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }

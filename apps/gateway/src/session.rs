@@ -10,6 +10,7 @@ use axum::{
     response::Response,
 };
 use futures_util::{SinkExt, StreamExt, stream::SplitSink};
+use malmoon_auth::CurrentSession;
 use malmoon_core::protocol::{ClientMessage, ErrorCode, PROTOCOL_VERSION, ServerMessage};
 use tokio::sync::mpsc;
 
@@ -18,11 +19,17 @@ use crate::{AppState, demo};
 /// How long a new connection may take to send `hello`.
 const HELLO_TIMEOUT: Duration = Duration::from_secs(10);
 
-pub(crate) async fn upgrade(ws: WebSocketUpgrade, State(state): State<AppState>) -> Response {
-    ws.on_upgrade(move |socket| run(socket, state))
+/// Only signed-in clients get a session: without one the handshake is refused with 401 before
+/// it becomes a WebSocket.
+pub(crate) async fn upgrade(
+    account: CurrentSession,
+    ws: WebSocketUpgrade,
+    State(state): State<AppState>,
+) -> Response {
+    ws.on_upgrade(move |socket| run(socket, state, account))
 }
 
-async fn run(socket: WebSocket, state: AppState) {
+async fn run(socket: WebSocket, state: AppState, account: CurrentSession) {
     let (mut sink, mut stream) = socket.split();
 
     let hello = tokio::time::timeout(HELLO_TIMEOUT, stream.next()).await;
@@ -56,7 +63,7 @@ async fn run(socket: WebSocket, state: AppState) {
     };
 
     let session_id = state.next_session_id();
-    tracing::info!(%session_id, ?client, "session opened");
+    tracing::info!(%session_id, ?client, user_id = %account.user_id, "session opened");
     let ready = ServerMessage::Ready {
         protocol_version: PROTOCOL_VERSION,
         session_id: session_id.clone(),

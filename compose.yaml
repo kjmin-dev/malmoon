@@ -1,0 +1,21 @@
+# The development and test database. `mise run db:up` starts it.
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: malmoon
+      POSTGRES_PASSWORD: malmoon
+      POSTGRES_DB: malmoon
+    ports:
+      # Not 5432, so it does not collide with a Postgres already on the machine.
+      - "127.0.0.1:54329:5432"
+    volumes:
+      - postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --username malmoon --dbname malmoon"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  postgres:

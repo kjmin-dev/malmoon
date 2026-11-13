@@ -18,8 +18,12 @@ export type LiveSession = {
 /** Settled segments kept on screen. Older ones scroll away. */
 const VISIBLE_SEGMENTS = 3;
 
-/** Keeps a gateway session open while the component is mounted and tracks its captions. */
-export function useSession(url: string, client: ClientKind): LiveSession {
+/**
+ * Keeps a gateway session open while the component is mounted and tracks its captions. The
+ * gateway only accepts signed-in users: mount this once there is one, and pass the session token
+ * in React Native.
+ */
+export function useSession(url: string, client: ClientKind, token?: string): LiveSession {
   const [status, setStatus] = useState<SessionStatus>({ state: "connecting" });
   const [segments, setSegments] = useState<readonly CaptionUpdate[]>([]);
 
@@ -27,6 +31,7 @@ export function useSession(url: string, client: ClientKind): LiveSession {
     const session = connectSession({
       url,
       client,
+      token,
       onEvent: (event) => {
         switch (event.type) {
           case "connecting":
@@ -47,7 +52,7 @@ export function useSession(url: string, client: ClientKind): LiveSession {
       },
     });
     return session.close;
-  }, [url, client]);
+  }, [url, client, token]);
 
   return { status, segments };
 }

@@ -1,12 +1,11 @@
+import { errorMessage } from "@malmoon/auth";
 import { useSession } from "@malmoon/session/react";
 import { colors, font, radius, space } from "@malmoon/tokens";
-import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { StyleSheet, Text, useColorScheme, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-// The Android emulator reaches the host machine at 10.0.2.2, the iOS simulator at localhost.
-const GATEWAY_URL =
-  process.env.EXPO_PUBLIC_GATEWAY_URL ??
-  (Platform.OS === "android" ? "ws://10.0.2.2:8787" : "ws://127.0.0.1:8787");
+import { restoreSession, SESSION_URL, type Session, signOut } from "../src/auth.ts";
+import { Button, SignInScreen } from "../src/SignInScreen.tsx";
 
 const STATUS_LABEL = {
   connecting: "연결하는 중",
@@ -14,9 +13,54 @@ const STATUS_LABEL = {
   offline: "연결 끊김",
 } as const;
 
+type State =
+  | { name: "loading" }
+  | { name: "signed_out" }
+  | { name: "signed_in"; session: Session }
+  /** The gateway could not say whether the saved session is still good. */
+  | { name: "unreachable"; message: string };
+
 export default function Home() {
   const palette = colors[useColorScheme() === "dark" ? "dark" : "light"];
-  const { status, segments } = useSession(GATEWAY_URL, "mobile");
+  const [state, setState] = useState<State>({ name: "loading" });
+
+  const restore = useCallback(() => {
+    setState({ name: "loading" });
+    restoreSession().then(
+      (session) => setState(session ? { name: "signed_in", session } : { name: "signed_out" }),
+      (error) => setState({ name: "unreachable", message: errorMessage(error) }),
+    );
+  }, []);
+  useEffect(restore, [restore]);
+
+  return (
+    <SafeAreaView style={[styles.screen, { backgroundColor: palette.backgroundBase }]}>
+      {state.name !== "signed_in" && (
+        <Text style={[styles.title, { color: palette.textPrimary }]}>Malmoon</Text>
+      )}
+      {state.name === "signed_out" && (
+        <SignInScreen onSignedIn={(session) => setState({ name: "signed_in", session })} />
+      )}
+      {state.name === "unreachable" && (
+        <>
+          <Text style={{ color: palette.textSecondary }}>{state.message}</Text>
+          <Button label="다시 시도" onPress={restore} />
+        </>
+      )}
+      {state.name === "signed_in" && (
+        <Captions
+          session={state.session}
+          onSignOut={() => signOut().finally(() => setState({ name: "signed_out" }))}
+        />
+      )}
+    </SafeAreaView>
+  );
+}
+
+/** Mounted only while signed in: the gateway refuses sessions without an account. */
+function Captions({ session, onSignOut }: { session: Session; onSignOut: () => void }) {
+  const palette = colors[useColorScheme() === "dark" ? "dark" : "light"];
+  const { status, segments } = useSession(SESSION_URL, "mobile", session.token);
   const statusColor = {
     connecting: palette.statusWarning,
     live: palette.statusSuccess,
@@ -24,7 +68,7 @@ export default function Home() {
   }[status.state];
 
   return (
-    <SafeAreaView style={[styles.screen, { backgroundColor: palette.backgroundBase }]}>
+    <>
       <View style={styles.header}>
         <Text style={[styles.title, { color: palette.textPrimary }]}>Malmoon</Text>
         <Text style={[styles.status, { color: statusColor }]}>{STATUS_LABEL[status.state]}</Text>
@@ -69,7 +113,8 @@ export default function Home() {
           {"게이트웨이에 연결할 수 없습니다. `mise run //apps/gateway:dev`로 실행하세요."}
         </Text>
       )}
-    </SafeAreaView>
+      <Button label="로그아웃" onPress={onSignOut} />
+    </>
   );
 }
 
