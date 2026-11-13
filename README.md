@@ -13,7 +13,7 @@
 | [제품 기획](docs/03-product-plan.md) | 제품 정의, 타깃, 기능, 요금제 가설, 로드맵, 리스크 |
 | [시스템 아키텍처](docs/04-architecture.md) | 클라이언트 구성, 실시간 파이프라인, 데이터 경로, 원가 |
 | [음성 인식 모델 비교](docs/05-stt-comparison.md) | 실시간 전사 후보의 특징, 성능, 비용 |
-| [디자인 시스템 아키텍처](docs/06-design-system.md) | 토큰 하나에서 웹, 데스크톱, 모바일의 코드를 생성하는 방법 |
+| [디자인 시스템](docs/06-design-system.md) | 토큰의 세 층, 따른 접근성 기준, 세 플랫폼이 공유하는 컴포넌트 계약 |
 | [계정과 로그인](docs/07-accounts.md) | 계정 모델, 이메일 코드와 소셜 로그인, 계정 연결 규칙, 세션 |
 | [출처](docs/sources.md) | 조사에 쓴 자료와 확인하지 못한 항목 |
 
@@ -33,7 +33,7 @@
 | 모바일 | React Native (Expo) |
 | 공유 코어와 게이트웨이 | Rust (axum, tokio) |
 | 계정 | 자체 PostgreSQL, 이메일 코드와 Google, Apple, 카카오, LINE 로그인 |
-| 디자인 시스템 | 자체 DTCG 토큰에서 CSS, TypeScript, Rust 코드를 생성 |
+| 디자인 시스템 | 자체 DTCG 토큰에서 CSS, TypeScript, Rust 코드를 생성. 같은 컴포넌트를 플랫폼마다 구현 |
 | 음성 인식 | Soniox (예비 ElevenLabs) |
 | 언어 모델 | Claude Haiku 5.5, Claude Sonnet 5.5 |
 | 도구 | mise, Cargo 워크스페이스, pnpm 워크스페이스, TypeScript 7.1(네이티브 컴파일러), Biome |
@@ -68,12 +68,16 @@ mise run //mobile:dev     # Expo 개발 서버
 | `crates/malmoon-auth` | 계정, 이메일 코드와 소셜 로그인, 세션 |
 | `crates/malmoon-core` | 세션 프로토콜, 자막 안정화, 어절 단위 줄바꿈 |
 | `crates/malmoon-tokens` | 생성된 Rust 토큰 |
-| `crates/malmoon-ui` | 토큰을 입힌 GPUI 컴포넌트 |
+| `crates/malmoon-ui` | GPUI 컴포넌트 |
 | `packages/tokens` | 생성된 CSS, Tailwind 테마, TypeScript 토큰 |
+| `packages/ui` | 웹 컴포넌트 (HeroUI 기반) |
+| `packages/ui-native` | React Native 컴포넌트 |
 | `packages/auth` | 계정 API 클라이언트 |
 | `packages/session` | 생성된 프로토콜 타입과 세션 클라이언트 |
 | `design/tokens` | 디자인 토큰의 원천 |
 | `tools/design-build` | 토큰 검증과 생성기 |
+
+디자인 시스템은 갤러리로 본다. 웹은 `mise run //web:dev`를 띄우고 `http://localhost:5173/design.html`, 데스크톱은 `mise run //desktop:gallery`, 모바일은 앱의 `/design` 화면이다.
 
 디자인 토큰이나 프로토콜 타입을 고친 뒤에는 `mise run generate`를 실행하고 생성된 파일을 함께 커밋한다. CI가 생성물이 최신인지 확인한다.
 
