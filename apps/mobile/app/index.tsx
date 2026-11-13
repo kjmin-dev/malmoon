@@ -2,6 +2,7 @@ import { errorMessage } from "@malmoon/auth";
 import { useSession } from "@malmoon/session/react";
 import { colors, radius, space, typography } from "@malmoon/tokens";
 import { Badge, Banner, Button, Text, useColors } from "@malmoon/ui-native";
+import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Text as NativeText, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -17,6 +18,7 @@ type State =
 
 export default function Home() {
   const palette = useColors();
+  const router = useRouter();
   const [state, setState] = useState<State>({ name: "loading" });
 
   const restore = useCallback(() => {
@@ -48,6 +50,16 @@ export default function Home() {
         <Captions
           session={state.session}
           onSignOut={() => signOut().finally(() => setState({ name: "signed_out" }))}
+        />
+      )}
+      {/* In development builds, a way to the design preview. */}
+      {__DEV__ && state.name !== "loading" && (
+        <Button
+          variant="ghost"
+          size="sm"
+          label="디자인 시스템 보기"
+          onPress={() => router.push("/design")}
+          style={styles.previewLink}
         />
       )}
     </SafeAreaView>
@@ -125,6 +137,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: space[4],
     gap: space[4],
+  },
+  previewLink: {
+    marginTop: "auto",
+    alignSelf: "center",
   },
   header: {
     flexDirection: "row",

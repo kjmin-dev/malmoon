@@ -6,9 +6,10 @@
     <title>Malmoon</title>
     <script>
       // Set the theme before first paint. The design tokens and HeroUI both read data-theme.
-      document.documentElement.dataset.theme = matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
+      // `?theme=dark` or `?theme=light` overrides the system setting, for looking at one mode.
+      document.documentElement.dataset.theme =
+        new URLSearchParams(location.search).get("theme") ??
+        (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     </script>
   </head>
   <body>

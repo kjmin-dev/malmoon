@@ -7,6 +7,6 @@ run = "cargo run --package malmoon-desktop --"
 description = "Build the desktop app for release"
 run = "cargo build --release --package malmoon-desktop"
 
-[tasks.gallery]
-description = "Open the design system gallery: every GPUI component in every variant"
-run = "cargo run --package malmoon-ui --example gallery --"
+[tasks.design]
+description = "Open the design preview: every token and GPUI component (add --light for light mode)"
+run = "cargo run --package malmoon-desktop -- --design"

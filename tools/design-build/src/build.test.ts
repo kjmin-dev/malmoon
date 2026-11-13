@@ -250,6 +250,8 @@ test("Rust gets one struct field per color and typed constants", () => {
   assert.match(source, /\/\/\/ Text on accent\.\n {4}pub text_on_accent: Color,/);
   assert.match(source, /text_on_accent: Color::rgba\(16, 16, 20, 0\.5\),/);
   assert.match(source, /pub const RADIUS_MD: f32 = 10\.0;/);
+  assert.match(source, /pub const fn entries\(&self\) -> \[\(&'static str, Color\); 2\]/);
+  assert.match(source, /\("text-on-accent", self\.text_on_accent\),/);
   assert.match(source, /pub const MOTION_DURATION_FAST: Duration = Duration::from_millis\(120\);/);
   assert.match(source, /pub const TYPOGRAPHY_BODY: Typography = Typography \{ size: 15\.0, /);
   assert.match(source, /pub const TOUCH: Sizes = Sizes \{\n {4}control_md: 48\.0,/);

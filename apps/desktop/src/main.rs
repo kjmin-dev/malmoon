@@ -1,6 +1,7 @@
 //! The Malmoon desktop app.
 //!
 //!   malmoon [--click-through] [--hide-from-capture] [--exit-after <seconds>]
+//!   malmoon --design [--light]     the design preview: every token and component
 //!
 //! `MALMOON_GATEWAY_URL` sets the gateway to connect to (default `ws://127.0.0.1:8787`), and
 //! `MALMOON_WEB_URL` the web app that signs the person in (default `http://localhost:5173`).
@@ -14,7 +15,7 @@ use std::time::Duration;
 
 use gpui_kit::assets::Assets;
 use gpui_kit::{
-    AppContext, Bounds, KeyBinding, WindowBackgroundAppearance, WindowBounds, WindowKind,
+    App, AppContext, Bounds, KeyBinding, WindowBackgroundAppearance, WindowBounds, WindowKind,
     WindowOptions, actions, px, size,
 };
 
@@ -24,6 +25,10 @@ use crate::prompter::Prompter;
 actions!(malmoon, [Quit]);
 
 struct Options {
+    /// Open the design preview instead of the prompter.
+    design: bool,
+    /// Start the design preview in light mode. The prompter itself is always dark.
+    light: bool,
     session: session::Config,
     overlay: OverlayOptions,
     /// Quit after this long. For smoke tests.
@@ -41,6 +46,8 @@ impl Options {
             .and_then(|seconds| seconds.parse().ok())
             .map(Duration::from_secs_f64);
         Self {
+            design: has("--design"),
+            light: has("--light"),
             session: session::Config {
                 gateway_url: std::env::var("MALMOON_GATEWAY_URL")
                     .unwrap_or_else(|_| "ws://127.0.0.1:8787".to_owned()),
@@ -58,32 +65,20 @@ impl Options {
 
 fn main() {
     let options = Options::from_env();
-    let session = session::spawn(options.session);
 
     gpui_kit::application().with_assets(Assets).run(move |cx| {
         malmoon_ui::init(cx);
         cx.bind_keys([KeyBinding::new("cmd-q", Quit, None)]);
         cx.on_action(|_: &Quit, cx| cx.quit());
 
-        let window_options = WindowOptions {
-            window_bounds: Some(WindowBounds::Windowed(Bounds::centered(
-                None,
-                size(px(720.0), px(360.0)),
-                cx,
-            ))),
-            titlebar: None,
-            // A pop-up floats above full-screen apps on every Space and does not take focus.
-            kind: WindowKind::PopUp,
-            focus: false,
-            is_resizable: false,
-            window_background: WindowBackgroundAppearance::Blurred,
-            ..Default::default()
-        };
-        gpui_kit::open_window(window_options, cx, move |window, cx| {
-            platform::configure_overlay(window, options.overlay);
-            cx.new(|cx| Prompter::new(session, window, cx))
-        })
-        .expect("the prompter window could not open");
+        if options.design {
+            if options.light {
+                malmoon_ui::set_mode(malmoon_tokens::Mode::Light, cx);
+            }
+            malmoon_ui::DesignPreview::open(cx);
+        } else {
+            open_prompter(options.session, options.overlay, cx);
+        }
 
         if let Some(exit_after) = options.exit_after {
             cx.spawn(async move |cx| {
@@ -93,4 +88,27 @@ fn main() {
             .detach();
         }
     });
+}
+
+fn open_prompter(session: session::Config, overlay: OverlayOptions, cx: &mut App) {
+    let session = session::spawn(session);
+    let window_options = WindowOptions {
+        window_bounds: Some(WindowBounds::Windowed(Bounds::centered(
+            None,
+            size(px(720.0), px(360.0)),
+            cx,
+        ))),
+        titlebar: None,
+        // A pop-up floats above full-screen apps on every Space and does not take focus.
+        kind: WindowKind::PopUp,
+        focus: false,
+        is_resizable: false,
+        window_background: WindowBackgroundAppearance::Blurred,
+        ..Default::default()
+    };
+    gpui_kit::open_window(window_options, cx, move |window, cx| {
+        platform::configure_overlay(window, overlay);
+        cx.new(|cx| Prompter::new(session, window, cx))
+    })
+    .expect("the prompter window could not open");
 }

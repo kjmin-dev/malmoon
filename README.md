@@ -77,7 +77,7 @@ mise run //mobile:dev     # Expo 개발 서버
 | `design/tokens` | 디자인 토큰의 원천 |
 | `tools/design-build` | 토큰 검증과 생성기 |
 
-디자인 시스템은 갤러리로 본다. 웹은 `mise run //web:dev`를 띄우고 `http://localhost:5173/design.html`, 데스크톱은 `mise run //desktop:gallery`, 모바일은 앱의 `/design` 화면이다.
+디자인 시스템은 플랫폼마다 있는 디자인 프리뷰로 둘러본다. 웹은 `mise run //web:dev`를 띄우고 `http://localhost:5173/design`, 데스크톱은 `mise run //desktop:design`, 모바일은 개발 빌드의 첫 화면 아래 "디자인 시스템 보기"다.
 
 디자인 토큰이나 프로토콜 타입을 고친 뒤에는 `mise run generate`를 실행하고 생성된 파일을 함께 커밋한다. CI가 생성물이 최신인지 확인한다.
 

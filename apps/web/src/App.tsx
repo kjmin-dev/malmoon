@@ -32,9 +32,14 @@ export function App() {
         <Text variant="title" as="h1">
           Malmoon
         </Text>
-        <Button variant="ghost" size="sm" onPress={toggleTheme}>
-          {theme === "dark" ? "밝은 화면" : "어두운 화면"}
-        </Button>
+        <div className="flex items-center gap-3">
+          <a className="text-mm-detail text-mm-text-accent underline" href="/design">
+            디자인 시스템
+          </a>
+          <Button variant="ghost" size="sm" onPress={toggleTheme}>
+            {theme === "dark" ? "밝은 화면" : "어두운 화면"}
+          </Button>
+        </div>
       </header>
 
       {boot?.notice && (

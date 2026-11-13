@@ -335,7 +335,18 @@ export function emitRust(model: Model): string {
     if (token.description) lines.push(`    /// ${token.description}`);
     lines.push(`    pub ${field(token)}: Color,`);
   }
-  lines.push("}");
+  lines.push(
+    "}",
+    "",
+    "impl Colors {",
+    "    /// Every color with its token name, in token order. For screens that list the colors.",
+    `    pub const fn entries(&self) -> [(&'static str, Color); ${model.colors.length}] {`,
+    "        [",
+  );
+  for (const token of model.colors) {
+    lines.push(`            ("${kebab(token.path)}", self.${field(token)}),`);
+  }
+  lines.push("        ]", "    }", "}");
   for (const mode of ["light", "dark"] as const) {
     lines.push("", `pub const ${mode.toUpperCase()}: Colors = Colors {`);
     for (const token of model.colors) {
