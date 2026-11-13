@@ -1,5 +1,6 @@
 [tasks.dev]
 description = "Run the gateway on 127.0.0.1:8787 with the scripted demo captions"
+depends = ["//:db:up"]
 env = { MALMOON_DEMO_CAPTIONS = "1" }
 run = "cargo run --package malmoon-gateway"
 

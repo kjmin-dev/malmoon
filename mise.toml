@@ -26,6 +26,10 @@ pnpm = "12.19.0"
 rust = { version = "1.99.1", components = "rustfmt,clippy" }
 actionlint = "1.7.12"
 
+[env]
+# The Postgres of compose.yaml. `mise run db:up` starts it.
+DATABASE_URL = "postgres://malmoon:malmoon@127.0.0.1:54329/malmoon"
+
 [vars]
 # Everything a generator writes. `check:generated` fails if any of it is out of date.
 generated = "crates/malmoon-tokens/src/generated.rs packages/tokens/src/generated packages/session/src/generated"
@@ -44,6 +48,20 @@ sources = [
   "tools/*/package.json",
 ]
 outputs = { auto = true }
+
+# ---------------------------------------------------------------- database
+
+[tasks."db:up"]
+description = "Start the local Postgres (Docker) and wait until it accepts connections"
+run = "docker compose up --detach --wait"
+
+[tasks."db:down"]
+description = "Stop the local Postgres. Its data stays in the Docker volume"
+run = "docker compose down"
+
+[tasks."db:reset"]
+description = "Delete the local database and start an empty one"
+run = ["docker compose down --volumes", { task = "db:up" }]
 
 # ---------------------------------------------------------------- generated code
 #
@@ -100,6 +118,8 @@ run = [
 
 [tasks."check:rust"]
 description = "Format-check the Rust workspace, then lint and test the crates that build on any OS"
+# The account tests run against a real Postgres. Each test gets a database of its own.
+depends = ["db:up"]
 run = [
   "cargo fmt --all --check",
   "cargo clippy --workspace --exclude malmoon-desktop --exclude malmoon-ui --all-targets --all-features -- --deny warnings",
@@ -107,9 +127,10 @@ run = [
 ]
 
 [tasks."check:desktop"]
-description = "Lint and build the desktop app and its UI crate (macOS)"
+description = "Lint, test, and build the desktop app and its UI crate (macOS)"
 run = [
   "cargo clippy --package malmoon-desktop --package malmoon-ui --all-targets -- --deny warnings",
+  "cargo test --package malmoon-desktop --package malmoon-ui",
   "cargo build --package malmoon-desktop",
 ]
 

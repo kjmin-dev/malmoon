@@ -1,8 +1,9 @@
 //! The Malmoon real-time gateway.
 //!
-//! Clients open one WebSocket per meeting session. The gateway will route their audio to the
-//! speech models and send captions back. Only the session handshake exists so far: no model is
-//! connected yet, and captions come from a scripted demo feed when one is enabled.
+//! Clients sign in through the account routes of `malmoon-auth`, then open one WebSocket per
+//! meeting session. The gateway will route their audio to the speech models and send captions
+//! back. Only the session handshake exists so far: no model is connected yet, and captions come
+//! from a scripted demo feed when one is enabled.
 
 #![forbid(unsafe_code)]
 
@@ -14,7 +15,8 @@ use std::sync::{
     atomic::{AtomicU64, Ordering},
 };
 
-use axum::{Router, routing::get};
+use axum::{Router, extract::FromRef, routing::get};
+use malmoon_auth::Auth;
 use malmoon_core::protocol::SESSION_PATH;
 use tower_http::trace::TraceLayer;
 
@@ -25,9 +27,10 @@ pub struct Config {
     pub demo_captions: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub(crate) struct AppState {
     config: Config,
+    auth: Auth,
     next_session: Arc<AtomicU64>,
 }
 
@@ -37,14 +40,22 @@ impl AppState {
     }
 }
 
-pub fn router(config: Config) -> Router {
+impl FromRef<AppState> for Auth {
+    fn from_ref(state: &AppState) -> Self {
+        state.auth.clone()
+    }
+}
+
+pub fn router(config: Config, auth: Auth) -> Router {
     let state = AppState {
         config,
+        auth: auth.clone(),
         next_session: Arc::new(AtomicU64::new(1)),
     };
     Router::new()
         .route("/healthz", get(|| async { "ok" }))
         .route(SESSION_PATH, get(session::upgrade))
-        .layer(TraceLayer::new_for_http())
         .with_state(state)
+        .merge(auth.router())
+        .layer(TraceLayer::new_for_http())
 }
