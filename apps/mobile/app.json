@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Malmoon",
+    "slug": "malmoon",
+    "scheme": "malmoon",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

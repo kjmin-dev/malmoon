@@ -1,0 +1,16 @@
+{
+  "name": "@malmoon/tokens",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./theme.css": "./src/generated/theme.css",
+    "./tailwind.css": "./src/generated/tailwind.css"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

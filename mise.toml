@@ -1,0 +1,126 @@
+# Tools and tasks for the whole repository. Install mise (https://mise.jdx.dev), then:
+#
+#   mise install         install the pinned toolchains
+#   mise run check       run everything CI runs
+#   mise tasks --all     list every task, including each app's
+#
+# Each app under apps/ has its own mise.toml. Its tasks are addressed by path
+# (`mise run //apps/web:dev`) or by alias (`mise run //web:dev`).
+
+min_version = "2026.10.0"
+monorepo_root = true
+
+[monorepo]
+config_roots = ["apps/*"]
+lockfile = true
+
+[monorepo.path_aliases]
+desktop = "apps/desktop"
+gateway = "apps/gateway"
+mobile = "apps/mobile"
+web = "apps/web"
+
+[tools]
+node = "26.13.1"
+pnpm = "12.19.0"
+rust = { version = "1.99.1", components = "rustfmt,clippy" }
+actionlint = "1.7.12"
+
+[vars]
+# Everything a generator writes. `check:generated` fails if any of it is out of date.
+generated = "crates/malmoon-tokens/src/generated.rs packages/tokens/src/generated packages/session/src/generated"
+
+# ---------------------------------------------------------------- setup
+
+[tasks.install]
+description = "Install JavaScript dependencies"
+run = "pnpm install"
+sources = [
+  "package.json",
+  "pnpm-lock.yaml",
+  "pnpm-workspace.yaml",
+  "apps/*/package.json",
+  "packages/*/package.json",
+  "tools/*/package.json",
+]
+outputs = { auto = true }
+
+# ---------------------------------------------------------------- generated code
+#
+# The generators are quick and always run: skipping them when their inputs look unchanged would
+# let `check:generated` pass on a fresh checkout without regenerating anything.
+
+[tasks.tokens]
+description = "Generate the platform token files from design/tokens"
+depends = ["install"]
+run = "pnpm --filter @malmoon/design-build build"
+
+[tasks.protocol]
+description = "Generate the TypeScript protocol types from malmoon-core"
+env = { TS_RS_EXPORT_DIR = "{{config_root}}/packages/session/src/generated" }
+run = [
+  # ts-rs only adds files, so clear the directory to drop types that no longer exist.
+  "rm -rf packages/session/src/generated",
+  "cargo test --quiet --package malmoon-core --features ts export_",
+]
+
+[tasks.generate]
+description = "Run every code generator"
+depends = ["tokens", "protocol"]
+
+[tasks."check:generated"]
+description = "Fail if committed generated code is out of date"
+depends = ["generate"]
+# Compares the regenerated files with the index, and catches new files that were never added.
+run = '''
+stale="$(git diff --name-only -- {{vars.generated}}; git ls-files --others --exclude-standard -- {{vars.generated}})"
+if [ -n "$stale" ]; then
+  echo "$stale"
+  echo "Generated code is out of date. Run 'mise run generate' and commit the result." >&2
+  exit 1
+fi
+'''
+
+# ---------------------------------------------------------------- checks
+
+[tasks.fmt]
+description = "Format everything"
+depends = ["install"]
+run = ["cargo fmt --all", "pnpm exec biome check --write"]
+
+[tasks."check:js"]
+description = "Lint, type-check, test, and build the TypeScript workspace"
+depends = ["install"]
+run = [
+  "pnpm exec biome ci",
+  "pnpm --recursive --if-present run typecheck",
+  "pnpm --recursive --if-present run test",
+  "pnpm --filter @malmoon/web build",
+]
+
+[tasks."check:rust"]
+description = "Format-check the Rust workspace, then lint and test the crates that build on any OS"
+run = [
+  "cargo fmt --all --check",
+  "cargo clippy --workspace --exclude malmoon-desktop --exclude malmoon-ui --all-targets --all-features -- --deny warnings",
+  "cargo test --workspace --exclude malmoon-desktop --exclude malmoon-ui --all-features",
+]
+
+[tasks."check:desktop"]
+description = "Lint and build the desktop app and its UI crate (macOS)"
+run = [
+  "cargo clippy --package malmoon-desktop --package malmoon-ui --all-targets -- --deny warnings",
+  "cargo build --package malmoon-desktop",
+]
+
+[tasks."check:workflows"]
+description = "Lint the GitHub Actions workflows"
+run = "actionlint"
+
+[tasks.check]
+description = "Run everything CI runs"
+# Regenerate first: the generators rewrite files that the other checks read.
+run = [
+  { task = "check:generated" },
+  { tasks = ["check:js", "check:rust", "check:desktop", "check:workflows"] },
+]

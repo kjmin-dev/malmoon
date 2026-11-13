@@ -1,0 +1,17 @@
+{
+  "name": "@malmoon/design-build",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node src/build.ts",
+    "test": "node --test \"src/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "style-dictionary": "^5.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.0",
+    "typescript": "catalog:"
+  }
+}

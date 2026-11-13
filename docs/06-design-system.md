@@ -1,145 +1,130 @@
 # 디자인 시스템 아키텍처
 
-> 기준일 2026-11-12. Astryx는 커밋 `55b9032`(core 0.7.15) 기준으로 소스를 읽고 판단했다. 실행해 보지는 않았다.
+> 기준일 2026-11-13. 토큰 파이프라인과 세 플랫폼의 토큰 사용은 저장소에 구현돼 있고 `mise run check`가 검증한다.
+> 컴포넌트 범위와 모바일 UI 키트는 계획이다.
 
 ## 결론
 
-[Astryx](https://github.com/meta/astryx)를 기준으로 세 플랫폼을 묶을 수 있다.
-웹은 Astryx를 그대로 쓰고, 데스크톱(GPUI)과 모바일(React Native)은 Astryx의 테마와 컴포넌트 계약에서 코드를 생성해 맞춘다.
+Malmoon이 소유한 토큰 파일 하나가 원천이고, 세 플랫폼은 거기서 생성한 파일을 쓴다.
 
-- **공유하는 것은 컴포넌트 코드가 아니라 결정이다.** 토큰 이름과 값, 컴포넌트의 속성 이름과 선택지, 아이콘 이름, 문자열을 공유한다. Astryx도 같은 원칙을 명시한다: "Web and native share contracts and logic, not components."
-- **선례가 저장소 안에 있다.** Astryx의 실험 패키지 `packages/native`가 테마와 컴포넌트 문서에서 Swift 코드를 생성한다. Malmoon은 같은 구조로 Rust와 React Native 생성기를 만든다.
-- **웹 프레임워크는 React로 확정된다.** Astryx가 React 19 전용이기 때문이다. SolidJS는 선택지에서 빠진다.
-- **GPUI 바인딩은 Malmoon이 끝까지 소유한다.** Astryx는 필수 런타임을 플랫폼 SDK와 Meta 프로젝트로 제한하므로, 상위 저장소가 GPUI를 지원할 일은 없다.
-
-## 누가 무엇을 맡나
-
-| 플랫폼 | Astryx에서 그대로 가져오는 것 | Malmoon이 생성하는 것 | Malmoon이 직접 만드는 것 |
-| --- | --- | --- | --- |
-| 웹 (React) | 컴포넌트 150여 개, 테마 정의와 빌드, 문자열 | Malmoon 테마 CSS | 글꼴 로딩, 제품 전용 컴포넌트 |
-| 데스크톱 (GPUI) | 토큰 어휘와 해석기, 컴포넌트 문서, 아이콘 이름, 문자열 | Rust 토큰, Rust 속성 타입 | 모든 컴포넌트 구현, 모션, 반투명 재질 |
-| 모바일 (React Native) | 데스크톱과 같은 입력 | TypeScript 토큰과 속성 타입 | 컴포넌트 구현 (공식 패키지가 나올 때까지) |
+- **공유하는 것은 컴포넌트 코드가 아니라 결정이다.** 토큰의 이름과 값을 공유하고, 컴포넌트는 플랫폼마다 그 플랫폼의 방식으로 만든다.
+- **토큰 어휘는 Malmoon의 것이다.** 특정 UI 라이브러리의 변수 이름을 따르지 않는다. 라이브러리와는 얇은 연결 파일 하나로 만난다.
+- **웹은 HeroUI v3를 쓴다.** React Aria와 Tailwind v4 기반이다. 토큰을 HeroUI의 테마 변수에 연결한다.
+- **데스크톱은 직접 만든다.** 포커스와 텍스트 입력 같은 동작은 gpui-component에 맡기고, 모양은 토큰으로 입힌다.
+- **모바일 UI 키트는 아직 고르지 않았다.** 지금은 토큰만 쓴다. 4단계 착수 시점에 정한다.
 
 ## 구조
 
 ```mermaid
 flowchart TD
-  THEME["Malmoon 테마<br/>Astryx defineTheme"]
-  DOCS["Astryx 컴포넌트 문서<br/>+ Malmoon 제품 컴포넌트 계약"]
-  ICONS["아이콘 SVG, 글꼴, 문자열"]
+  SRC["design/tokens<br/>DTCG JSON"]
+  BUILD["tools/design-build<br/>검증, 대비 검사, 생성"]
+  SRC --> BUILD
 
-  THEME --> EXTRACT["추출기<br/>토큰 해석, 값 변환"]
-  DOCS --> BUILD["계약 빌더"]
-  EXTRACT --> TOKENS["tokens.json"]
-  BUILD --> CONTRACTS["contracts.json"]
+  BUILD --> CSS["theme.css<br/>CSS 변수"]
+  BUILD --> TW["tailwind.css<br/>Tailwind 테마"]
+  BUILD --> TS["tokens.ts<br/>TypeScript 상수"]
+  BUILD --> RS["generated.rs<br/>Rust 상수"]
 
-  THEME --> WEB["웹<br/>Astryx 테마 CSS + Astryx 컴포넌트"]
-  TOKENS --> RUST["데스크톱<br/>Rust 토큰, 속성 타입 → GPUI 컴포넌트"]
-  CONTRACTS --> RUST
-  TOKENS --> RN["모바일<br/>TS 토큰, 속성 타입 → RN 컴포넌트"]
-  CONTRACTS --> RN
-  ICONS --> WEB
-  ICONS --> RUST
-  ICONS --> RN
+  CSS --> WEB["웹<br/>HeroUI 연결 파일 + Tailwind"]
+  TW --> WEB
+  TS --> RN["모바일<br/>StyleSheet"]
+  RS --> UI["malmoon-ui<br/>GPUI 테마와 컴포넌트"]
+  UI --> DESKTOP["데스크톱"]
 ```
 
-핵심은 가운데의 두 파일이다. `tokens.json`과 `contracts.json`은 Malmoon이 소유하는 중간 산출물이다.
-Astryx 내부가 바뀌면 추출기만 고치면 되고, Rust와 React Native 생성기는 영향을 받지 않는다.
+생성된 파일은 저장소에 커밋한다. CI가 다시 생성해서 커밋된 것과 다르면 실패한다(`mise run check:generated`).
 
 ## 토큰
 
-### 어휘는 Astryx 것을 쓴다
+### 원천 파일
 
-Astryx 코어 토큰은 211개이고 의미 단위 한 계층이다. 색 98, 글자 크기 체계 54, 간격 15, 지속 시간 10, 그림자 8, 모서리 7개 등이다.
-색 이름은 `--color-<text|icon|background|border>-<역할>` 문법을 따른다. Malmoon은 이 이름을 세 플랫폼에서 그대로 쓴다.
-
-테마는 Astryx의 `defineTheme`으로 한 곳에서 작성한다. 기본 테마(neutral)를 확장하고 강조색, 글꼴, 모서리, 모션만 바꾼다.
-
-### 값은 플랫폼 형식으로 변환한다
-
-Astryx 테마 값은 CSS 문자열이다(`light-dark()`, `oklch()`, `color-mix()`, `calc()`, rem).
-추출기가 이를 해석해 플랫폼 중립 값으로 바꾸고, 생성기가 플랫폼 타입으로 옮긴다.
-
-| 종류 | `tokens.json` | 웹 | 데스크톱 (GPUI) | 모바일 (RN) |
-| --- | --- | --- | --- | --- |
-| 색 | sRGB 16진수, 라이트와 다크 두 값 | Astryx CSS 변수 그대로 | `Hsla` 상수 | 16진수 문자열 |
-| 길이 | px (1rem은 16px) | rem, px | `px()` | 숫자 (dp) |
-| 글자 | 크기, 굵기, 줄 높이 배수, 글꼴 목록 | CSS 변수 | 글자 스타일 구조체 | 스타일 객체 |
-| 그림자 | 층별 x, y, 흐림, 퍼짐, 색 | CSS 변수 | `BoxShadow` | `boxShadow` |
-| 모션 | 밀리초, 3차 베지어 좌표 | CSS 변수 | `Duration`과 이징 함수 | Reanimated 이징 |
-
-- `tokens.json`은 DTCG 형식(2025.10 안정판)으로 쓴다. 표준 도구로 대비 검사와 Figma 연동을 붙일 수 있다.
-- 값 변환은 Astryx의 `css-values.mjs`를 고정 커밋에서 가져와 쓴다. 의존성이 없는 1,135줄 파일이고 출력이 Swift에 묶여 있지 않다.
-- 표현할 수 없는 값은 빌드를 실패시킨다. GPUI는 sRGB 색과 바깥 그림자만 다루므로, 테마는 sRGB 범위 안에서 작성한다.
-- 모션 토큰은 Astryx의 Swift 생성기가 내보내지 않는다. 밀리초와 베지어 해석은 Malmoon이 추가한다.
-
-### 제품 전용 토큰
-
-Astryx 어휘에 없는 것만 추가한다. Astryx 테마의 로컬 토큰 계층에 정의해 웹에서도 CSS 변수로 나오게 한다.
-
-| 토큰 | 용도 |
+| 파일 | 내용 |
 | --- | --- |
-| 초안 자막 글자색 | 아직 확정되지 않은 자막 |
-| 불확실 표시색 | 인식 신뢰도가 낮은 단어 |
-| 데이터 경로 색 세 가지 | 표준, 무보존, 기밀 배지 |
-| 오버레이 표면 | 반투명 프롬프터 배경 |
-| 자막 확정 모션 | 초안이 확정본으로 바뀌는 전환 |
+| `design/tokens/base.json` | 간격, 모서리, 글자, 모션, 그림자, 그리고 모드와 무관한 오버레이 색 |
+| `design/tokens/color.light.json` | 라이트 모드 색 |
+| `design/tokens/color.dark.json` | 다크 모드 색 |
 
-### 모드
+형식은 DTCG 2025.10이다. 파일 읽기와 별칭 해석은 Style Dictionary가 맡고, 플랫폼별 출력은 `tools/design-build`의 생성기가 직접 쓴다. Style Dictionary에는 Rust 출력이 없고, 한 파일에 두 모드를 담는 출력도 없기 때문이다.
 
-- **라이트와 다크.** Astryx가 지원하는 두 모드를 그대로 쓴다.
-- **오버레이.** 프롬프터는 어떤 화면 위에서도 읽혀야 한다. 다크 토큰과 반투명 재질을 기본으로 한다.
-- **재질.** 반투명은 토큰 값이 아니라 표면별 의도(불투명, 반투명)로 선언하고 플랫폼이 구현한다. 웹은 배경 흐림, GPUI는 창 배경 블러, React Native는 블러 뷰다.
-- **모바일 크기.** Astryx 테마의 터치 기기용 조정 규칙을 적용한 값을 따로 추출한다.
+### 어휘
 
-## 컴포넌트 계약
-
-계약은 컴포넌트의 플랫폼 중립 정의다. 이름, 속성과 타입, 선택지, 콜백, 내용 슬롯을 담는다.
-
-- **Astryx 컴포넌트.** Astryx의 계약 빌더가 컴포넌트 문서를 읽어 계약을 만든다. `className`, DOM 이벤트, `aria-*` 같은 웹 전용 속성은 이유와 함께 분리된다. 현재 18개 컴포넌트에 계약이 있다.
-- **Malmoon 제품 컴포넌트.** Astryx에 없는 컴포넌트는 같은 형식으로 계약을 직접 쓴다.
-- **보완할 점.** Astryx 계약에는 기본값이 빠져 있다. 컴포넌트 문서에서 기본값을 읽어 `contracts.json`에 채운다.
-
-`contracts.json`에서 두 가지를 생성한다.
-
-| 대상 | 생성물 | 규칙 |
+| 그룹 | 토큰 | 용도 |
 | --- | --- | --- |
-| Rust | 선택지 `enum`, 선택 속성 `Option<T>`, 아이콘 이름 타입 | Rust 예약어 검사를 추가한다 |
-| React Native | 속성 타입 선언 | iOS와 Android 전용 속성을 조건별로 나눈다 |
+| `color.background` | `base`, `surface` | 페이지와 카드 배경 |
+| `color.text` | `primary`, `secondary`, `on-accent` | 본문, 보조 글자, 강조색 위 글자 |
+| `color.border` | `default` | 경계선 |
+| `color.accent` | `default` | 주요 동작과 포커스 |
+| `color.status` | `danger`, `success`, `warning` | 상태 표시 |
+| `color.data-path` | `standard`, `zero-retention`, `confidential` | 세션의 데이터 경로 배지 |
+| `color.overlay` | `surface`, `border`, `text-primary`, `text-draft`, `text-uncertain` | 프롬프터 오버레이 |
+| `space` | `1`~`8` | 4px 격자 |
+| `radius` | `sm`, `md`, `lg`, `full` | 모서리 |
+| `font` | `family`, `size`, `weight`, `line-height` | 글자 |
+| `motion` | `duration`, `easing`, `caption-confirm` | 전환 |
+| `shadow` | `overlay` | 그림자 |
 
-선택지 이름이 생성된 타입으로 고정되므로, 플랫폼마다 `variant` 값이 달라지는 일은 컴파일 단계에서 막힌다.
+오버레이 색은 두 모드에서 값이 같다. 프롬프터는 어떤 화면 위에서도 읽혀야 해서 항상 어둡고 반투명하다.
+
+### 플랫폼별 형식
+
+| 종류 | 웹 (CSS) | 데스크톱 (Rust) | 모바일 (TypeScript) |
+| --- | --- | --- | --- |
+| 색 | `light-dark(#ffffff, #0e0e11)` | 모드별 `Colors` 구조체의 `Color` 필드 | 모드별 객체의 문자열 |
+| 길이 | `10px` | `f32` | 숫자 |
+| 지속 시간 | `200ms` | `std::time::Duration` | 밀리초 숫자 |
+| 이징 | `cubic-bezier(...)` | `[f32; 4]` | 숫자 네 개 |
+| 그림자 | `0px 8px 24px 0px rgb(...)` | `Shadow` 구조체 | 객체 |
+| 글꼴 목록 | 쉼표로 이은 문자열 | `&[&str]` | 문자열 배열 |
+
+`malmoon-tokens` 크레이트는 의존성이 없다. GPUI 타입으로 바꾸는 일은 `malmoon-ui`가 한다.
+
+### 빌드가 거부하는 것
+
+어느 한 플랫폼이 표현하지 못하는 값은 빌드 단계에서 막는다.
+
+- sRGB가 아닌 색 공간. GPUI와 React Native는 sRGB만 다룬다.
+- `hex`가 `components`와 맞지 않는 색
+- `px`가 아닌 길이, `ms`가 아닌 지속 시간
+- 안쪽 그림자. GPUI는 바깥 그림자만 그린다.
+- 한 모드에만 있는 색
+- 대비가 기준에 못 미치는 글자와 배경 조합
+
+대비는 WCAG 2 기준으로 본다. 본문은 4.5:1, 초안 자막처럼 큰 글자는 3:1이다. 오버레이 조합은 흰 화면 위와 검은 화면 위에 올린 두 경우를 모두 검사한다. 검사할 조합은 `tools/design-build/src/contrast.ts`에 있다.
 
 ## 플랫폼별 구현
 
 ### 웹
 
-- Astryx 컴포넌트와 Malmoon 테마를 그대로 쓴다. 관리 콘솔은 Astryx의 표, 설정, 대시보드 템플릿에서 시작한다.
-- 제품 전용 컴포넌트는 Astryx CSS 변수를 쓰는 일반 CSS로 만든다.
-- 실시간 자막은 줄 단위로 구독하게 만들어, 초당 수십 번의 갱신이 화면 전체를 다시 그리지 않게 한다.
+- `theme.css`가 모든 토큰을 `--mm-*` CSS 변수로 내보낸다. 색은 `light-dark()`로 색 구성표를 따르고, 루트 요소의 `data-theme`으로 덮어쓸 수 있다.
+- `tailwind.css`가 그 변수를 Tailwind 테마로 내보낸다. 키에 `mm` 접두사가 붙는다(`bg-mm-overlay-surface`, `rounded-mm-lg`). Tailwind 기본값이나 HeroUI의 테마와 이름이 겹치지 않게 하기 위해서다.
+- `apps/web/src/styles/heroui-bridge.css`가 HeroUI의 테마 변수(`--background`, `--accent`, `--radius` 등)를 토큰에 연결한다. HeroUI의 변수 이름을 아는 곳은 이 파일뿐이다. 여기에 없는 변수는 HeroUI 기본값을 쓴다.
+- 한국어 줄바꿈은 `word-break: keep-all`로 어절 단위로 한다.
 
 ### 데스크톱 (GPUI)
 
-- 동작(포커스, 키보드, 입력기, 팝오버)은 gpui-component에 맡기고, 모양은 Malmoon 토큰으로 입힌다. gpui-component의 테마 구조체에 Astryx 토큰을 대응시키는 코드를 생성한다.
-- 그 위에 `malmoon-ui` 크레이트가 계약에 맞춘 API와 제품 전용 컴포넌트를 제공한다.
-- 한국어 어절 단위 줄바꿈은 GPUI에 없다. 분절 로직을 `malmoon-core`에 두고 자막 줄을 미리 끊는다.
+- `malmoon_ui::init`이 gpui-component의 테마에 토큰을 입힌다. 글꼴, 모서리, 주요 색을 덮어쓴다.
+- gpui-component는 모든 창의 바닥에 테마 배경색을 칠한다. 이 색이 불투명하면 오버레이의 블러 배경이 가려지므로 투명으로 바꾸고, 표면마다 배경을 직접 칠한다.
+- 프롬프터 컴포넌트는 `malmoon-ui`에 직접 만든다. 지금은 `CaptionStream` 하나가 있다.
+- GPUI는 한국어를 어절 중간에서 끊는다. `malmoon-core`의 `wrap_words`가 글자 폭을 재서 줄을 미리 나눈다.
 
 ### 모바일 (React Native)
 
-- 4단계 전까지는 토큰과 타입 생성만 준비하고 컴포넌트는 만들지 않는다.
-- Astryx에 React Native 패키지 명세(AST-112)가 초안으로 올라와 있다. 코드와 일정은 없다. 4단계 착수 시점에 공식 패키지를 채택할지, 직접 만들지 정한다.
-- 계약 이름을 Astryx와 맞춰 두면 공식 패키지로 옮길 때 드는 비용이 작다.
+- `@malmoon/tokens`의 TypeScript 상수를 `StyleSheet`에 그대로 쓴다.
+- iOS는 `lineBreakStrategyIOS="hangul-word"`로 어절 단위로 줄을 바꾼다. Android에는 같은 옵션이 없어 아직 해결하지 못했다.
+- UI 키트 후보는 HeroUI Native와 Uniwind다. 웹의 HeroUI와 변수 이름이 같아서 연결 파일을 함께 쓸 가능성이 있다. 실제로 한 파일로 되는지, 웹과 컴포넌트 API가 같은지는 확인하지 않았다.
 
-## 컴포넌트 범위
+## 컴포넌트
 
-### 기본 컴포넌트
+### 계약
 
-웹은 Astryx 전체를 쓴다. 데스크톱과 모바일은 계약이 있는 것 중 필요한 것만 구현한다.
+플랫폼 사이에서 지금 생성해 공유하는 타입은 세션 프로토콜뿐이다. `malmoon-core`의 Rust 타입에서 TypeScript 타입을 만든다(`mise run protocol`).
 
-Button, Text, Heading, TextInput, Switch, Selector, Card, Divider, Badge, Icon, HStack, VStack, ProgressBar, Item, ListItem, Avatar
+컴포넌트의 속성 이름과 선택지를 한 곳에 정의해 플랫폼별 타입을 생성하는 일은 아직 하지 않았다. 같은 컴포넌트가 두 플랫폼에 실제로 생겨서 어긋날 위험이 보일 때 도입한다.
 
 ### 프롬프터 세트
 
-제품의 핵심 화면을 이루는 전용 컴포넌트다. 숫자는 [로드맵](03-product-plan.md#로드맵)의 단계다.
+제품의 핵심 화면을 이루는 컴포넌트다. 숫자는 [로드맵](03-product-plan.md#로드맵)의 단계다.
 
 | 컴포넌트 | 역할 | 데스크톱 | 웹 | 모바일 |
 | --- | --- | --- | --- | --- |
@@ -153,55 +138,40 @@ Button, Text, Heading, TextInput, Switch, Selector, Card, Divider, Badge, Icon, 
 | HandoffSheet | 보조 화면 연결 (QR) | 2 | 2 | 4 |
 | CoachingCard | 문장별 코칭 | 3 | 3 | 4 |
 
+지금은 CaptionStream의 최소형이 세 플랫폼에 있다. 초안과 확정 상태, 번역을 표시하고, 불확실 단어 표시는 없다.
+
 ## 글꼴, 아이콘, 문자열
 
-| 자산 | 원천 | 웹 | 데스크톱 | 모바일 |
-| --- | --- | --- | --- | --- |
-| 글꼴 | Pretendard (OFL). 일본어는 Pretendard JP | 자체 호스팅, 부분 집합 | 굵기별 정적 파일을 앱에 싣는다 | 굵기별 정적 파일 |
-| 아이콘 | 단색 SVG 한 벌, Astryx 아이콘 이름 | Astryx 아이콘 슬롯 | 앱에 내장, 이름 `enum` 생성 | react-native-svg |
-| 문자열 | Astryx 로캘 파일 (ICU MessageFormat) | Astryx 그대로 | 같은 파일을 읽는다 | 같은 파일을 읽는다 |
-
-- GPUI에서 가변 글꼴의 굵기 축이 무시되는 이슈가 있어 정적 파일을 쓴다.
-- Astryx의 한국어 문자열은 642개 중 365개만 번역돼 있다. 나머지는 Malmoon이 채운다.
-- 한국어 줄바꿈은 플랫폼마다 다르다. 웹은 `word-break: keep-all`, iOS는 `hangul-word` 전략, Android와 GPUI는 자체 분절이 필요하다.
+- **글꼴.** 토큰은 Pretendard를 첫 글꼴로 지정한다. 글꼴 파일은 아직 싣지 않아서 지금은 시스템 한글 글꼴로 그려진다.
+- **굵기.** 토큰에는 정적 글꼴 파일이 있는 굵기만 둔다. GPUI는 앱에 실은 가변 글꼴의 굵기 축을 무시하고, 파일이 없는 굵기는 가까운 굵기로 그린다.
+- **아이콘과 문자열.** 아직 정하지 않았다.
 
 ## 일관성 검증
 
-| 무엇을 | 어떻게 |
-| --- | --- |
-| 토큰 값 | 생성된 파일을 커밋하고, CI가 다시 생성해 차이가 있으면 실패시킨다. 웹 CSS와 `tokens.json`도 비교한다 |
-| 컴포넌트 API | 생성된 타입으로 컴파일 단계에서 강제한다 |
-| 색 대비 | 글자와 배경 쌍을 빌드 때 WCAG 2 기준으로 검사한다. 오버레이는 밝은 화면 위의 경우를 포함한다 |
-| 모양 | 플랫폼마다 같은 시나리오의 스크린샷 기준 이미지를 둔다. 플랫폼 간 비교는 나란히 놓고 사람이 본다 |
-
-스크린샷 도구는 웹이 Storybook과 Playwright, 모바일이 Storybook과 Maestro다. GPUI는 성숙한 도구가 없어 자체 갤러리 앱으로 시작한다.
-
-## 단계별 도입
-
-| 단계 | 디자인 시스템 작업 |
-| --- | --- |
-| 0. 검증 | Malmoon 테마 작성, 추출기와 Rust 생성기 시제품, GPUI 오버레이에서 토큰 적용 확인 |
-| 1. 동등 MVP | 데스크톱 기본 컴포넌트와 프롬프터 세트, 계약 생성기, 최소 웹(Astryx 그대로) |
-| 2. 차별화 | 웹 보조 화면용 프롬프터 세트, 데스크톱과 웹의 스크린샷 비교 |
-| 3. 팀과 보안 | Astryx 템플릿 기반 관리 콘솔 |
-| 4. 확장 | React Native 바인딩 (공식 패키지 또는 자체) |
-
-## 위험과 대응
-
-| 위험 | 내용 | 대응 |
+| 무엇을 | 어떻게 | 상태 |
 | --- | --- | --- |
-| Astryx의 잦은 변경 | 베타 단계이고 3~5주마다 호환성이 깨지는 릴리스가 나온다 | 버전을 정확히 고정하고 월 단위로 올린다. 중간 산출물이 생성기를 보호한다 |
-| 실험 패키지 의존 | 네이티브 패키지는 카나리 전용이고 생성 스크립트는 npm에 없다 | 필요한 파일만 고정 커밋에서 가져와 저장소에 둔다 (MIT, 출처 표기) |
-| 계약 범위 | 계약이 있는 컴포넌트가 18개뿐이다 | 필요한 컴포넌트의 계약을 직접 추가한다 |
-| GPUI 구현 비용 | 컴포넌트를 모두 직접 만들어야 한다 | 범위를 기본 16개와 프롬프터 세트로 제한하고 gpui-component를 기반으로 쓴다 |
-| 공식 React Native 패키지와의 충돌 | 나중에 나오면 자체 바인딩과 겹친다 | 4단계까지 컴포넌트 구현을 미룬다 |
-| 표현 손실 | Display P3 색과 안쪽 그림자는 GPUI에서 표현되지 않는다 | 생성기의 엄격 모드로 빌드에서 걸러낸다 |
+| 토큰 값 | 생성된 파일을 커밋하고 CI가 다시 생성해 비교한다 | 구현 |
+| 색 대비 | 토큰 빌드가 조합마다 검사한다 | 구현 |
+| 프로토콜 타입 | Rust에서 TypeScript를 생성하고 CI가 비교한다 | 구현 |
+| 모양 | 플랫폼마다 같은 시나리오의 스크린샷을 기준 이미지와 비교한다 | 없음 |
 
-## 확인이 필요한 항목
+## 검토하고 택하지 않은 것
 
-0단계 시제품에서 다음을 실제로 돌려 확인한다. 이 문서는 소스를 읽고 쓴 것이고 실행 결과가 아니다.
+| 안 | 택하지 않은 이유 |
+| --- | --- |
+| Astryx를 기준으로 삼기 | 베타이고 1~3일마다 릴리스가 나온다. 네이티브 패키지는 실험 단계이고 React Native 바인딩이 없다. 토큰 211개를 gpui-component 테마에 손실 없이 넣을 수 있는지도 확인되지 않았다 |
+| shadcn/ui와 React Native Reusables | 모바일 쪽 유지보수 신호가 약하고, 관리 콘솔용 표를 따로 붙여야 한다. 차선으로 남긴다 |
+| Tamagui, gluestack-ui | 1년 안에 메이저 버전이 두세 번 올랐다 |
+| Expo Router와 react-native-web으로 웹과 모바일을 한 앱으로 | 웹 범위가 DOM에 유리하고, react-native-web의 개발 활동이 줄었다 |
 
-- Astryx의 토큰 해석기가 React 없이 Node 스크립트에서 깨끗하게 실행되는지
-- 로컬 토큰 계층이 제품 전용 토큰을 담기에 맞는지
-- 터치 기기용 조정 규칙을 적용한 값을 해석기로 뽑을 수 있는지
-- gpui-component의 테마 구조체가 Astryx 토큰을 손실 없이 받는지
+토큰을 Malmoon이 소유하므로, 웹 UI 라이브러리를 바꾸는 비용은 연결 파일과 컴포넌트 사용처에 한정된다.
+
+## 위험과 미확인 항목
+
+| 항목 | 내용 | 대응 |
+| --- | --- | --- |
+| HeroUI와 Uniwind의 유료 계층 | 쓰는 패키지는 Apache-2.0과 MIT이지만 둘 다 유료 Pro 상품이 있다. 무료판과 기능이 어떻게 나뉘는지 확인하지 않았다 | 모바일 착수 전에 확인한다. 웹은 연결 파일 하나로 격리돼 있다 |
+| 연결되지 않은 HeroUI 변수 | 연결 파일에 없는 변수는 HeroUI 기본값이라 토큰과 색이 어긋날 수 있다 | 컴포넌트를 쓸 때마다 필요한 변수를 연결 파일에 추가한다 |
+| gpui-component의 변동 | 0.x이고 매주 릴리스가 나온다 | 정확한 버전으로 고정하고 `malmoon-ui`로 감싼다 |
+| 모바일 실행 | iOS와 Android 번들링까지만 확인했고 기기나 시뮬레이터에서 실행하지 않았다 | 4단계 착수 전에 실행해 확인한다 |
+| Android 한국어 줄바꿈 | 어절 단위 옵션이 없다 | 4단계에서 자체 분절을 검토한다 |

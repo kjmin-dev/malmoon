@@ -1,11 +1,11 @@
 # 출처
 
-> 모든 자료는 2026-11-12에 확인했다. 가격과 버전은 이후 달라질 수 있다.
+> 모든 자료는 2026-11-12와 13에 확인했다. 가격과 버전은 이후 달라질 수 있다.
 
 ## 조사 방법
 
 - 공개 웹 페이지, 공식 문서, 공개 저장소의 소스를 읽었다.
-- 유료 서비스에 가입하거나 제품을 실행해 측정하지는 않았다.
+- 유료 서비스에 가입하거나 제품을 실행해 측정하지는 않았다. 예외로 GPUI 오버레이는 시제품을 만들어 실행했다.
 - 본문에서 미확인이나 가정이라고 적은 항목은 근거를 찾지 못했거나 검색 요약으로만 본 것이다.
 
 ## Smooth
@@ -42,10 +42,14 @@
 - [zed-industries/zed](https://github.com/zed-industries/zed) 저장소의 `crates/gpui*` 소스 (2026-11-12 main)
 - [longbridge/gpui-kit](https://github.com/longbridge/gpui-kit) (gpui-component)
 - [zed-industries/awesome-gpui](https://github.com/zed-industries/awesome-gpui)
+- [rust-windowing/winit](https://github.com/rust-windowing/winit) 저장소의 macOS 창 소스 (v0.30.13과 2026-11-11 master). Iced, Slint, egui가 쓰는 창 계층이다
+- macOS 26.5에서 직접 만든 GPUI 오버레이 시제품의 실행 결과. 한국어 입력은 자동 입력 시험으로, 블러 배경은 화면 캡처로 확인했다
 
 ## 디자인 시스템
 
-- [meta/astryx](https://github.com/meta/astryx) 저장소 (커밋 `55b9032`): `packages/native`, `packages/core/src/theme`, `docs/architecture`, `docs/specs`
+- [meta/astryx](https://github.com/meta/astryx) 저장소 (커밋 `55b9032`): `packages/native`, `packages/core/src/theme`, `docs/architecture`, `docs/specs`. 검토하고 택하지 않았다
+- [HeroUI](https://heroui.com/docs), [HeroUI Native](https://heroui.com/docs/native), [Uniwind](https://uniwind.dev/). 패키지 라이선스는 npm 레지스트리에서 확인했다
+- [shadcn/ui](https://ui.shadcn.com/), [React Native Reusables](https://github.com/founded-labs/react-native-reusables), [Tamagui](https://tamagui.dev/), [gluestack-ui](https://gluestack.io/)
 - [DTCG 디자인 토큰 형식 2025.10](https://www.w3.org/community/reports/design-tokens/CG-FINAL-format-20251028/)
 - [Terrazzo](https://terrazzo.app/docs/), [Style Dictionary](https://styledictionary.com/)
 - [Pretendard](https://github.com/orioncactus/pretendard)
@@ -56,6 +60,9 @@
 - Smooth에 대한 독립적인 사용자 후기와 실제 지연 시간
 - 한국어와 한영 혼용 음성 인식의 독립 벤치마크
 - Google Meet 음성 번역의 한국어 포함 여부
-- GPUI 오버레이가 다른 앱의 전체 화면 위에 실제로 표시되는지 (설정은 표준 방식이나 시험하지 않았다)
-- Astryx 토큰 해석기를 브라우저 없이 실행한 결과 (소스만 읽었다)
-- Astryx의 React Native 패키지 출시 일정
+- GPUI 오버레이가 다른 앱의 전체 화면 위에 실제로 표시되는지 (창 설정값은 실행해 확인했고, 전체 화면 회의 앱 위에서는 보지 않았다)
+- GPUI 오버레이의 Windows 동작
+- HeroUI와 HeroUI Native가 같은 테마 파일과 같은 컴포넌트 API를 쓰는지
+- HeroUI Pro와 Uniwind Pro의 유료 범위
+- 모바일 앱의 기기 실행 (번들링까지만 확인했다)
+- Iced, Slint, egui의 글자 품질과 성능 (문서와 소스만 읽었다)

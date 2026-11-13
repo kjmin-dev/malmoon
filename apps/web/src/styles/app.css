@@ -1,0 +1,12 @@
+/* HeroUI's entry point brings in Tailwind itself. */
+@import "@heroui/styles";
+
+@import "@malmoon/tokens/theme.css";
+@import "@malmoon/tokens/tailwind.css";
+@import "./heroui-bridge.css";
+
+:root {
+  font-family: var(--mm-font-family-sans);
+  /* Korean breaks between words, not between syllables. */
+  word-break: keep-all;
+}

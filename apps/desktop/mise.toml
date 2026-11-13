@@ -1,0 +1,8 @@
+[tasks.dev]
+description = "Run the desktop prompter (expects the gateway to be running)"
+# Arguments after the task name go to the app: `mise run //desktop:dev --click-through`.
+run = "cargo run --package malmoon-desktop --"
+
+[tasks.build]
+description = "Build the desktop app for release"
+run = "cargo build --release --package malmoon-desktop"

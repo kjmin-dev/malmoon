@@ -1,0 +1,113 @@
+{
+  "color": {
+    "$type": "color",
+    "background": {
+      "base": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.0549, 0.0549, 0.0667],
+          "hex": "#0e0e11"
+        },
+        "$description": "Page background."
+      },
+      "surface": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.0941, 0.0941, 0.1098],
+          "hex": "#18181c"
+        },
+        "$description": "Cards and panels on top of the page."
+      }
+    },
+    "text": {
+      "primary": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.949, 0.949, 0.9608],
+          "hex": "#f2f2f5"
+        }
+      },
+      "secondary": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.6627, 0.6627, 0.7059],
+          "hex": "#a9a9b4"
+        }
+      },
+      "on-accent": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [1.0, 1.0, 1.0],
+          "hex": "#ffffff"
+        },
+        "$description": "Text on an accent-colored surface."
+      }
+    },
+    "border": {
+      "default": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.1725, 0.1725, 0.2],
+          "hex": "#2c2c33"
+        }
+      }
+    },
+    "accent": {
+      "default": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.3569, 0.3686, 0.9412],
+          "hex": "#5b5ef0"
+        },
+        "$description": "Primary actions and focus."
+      }
+    },
+    "status": {
+      "danger": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.9765, 0.4392, 0.4],
+          "hex": "#f97066"
+        }
+      },
+      "success": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.2784, 0.8039, 0.5373],
+          "hex": "#47cd89"
+        }
+      },
+      "warning": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.9922, 0.6902, 0.1333],
+          "hex": "#fdb022"
+        }
+      }
+    },
+    "data-path": {
+      "$description": "Badge colors for the three data paths a session can use.",
+      "standard": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.5529, 0.6353, 0.9843],
+          "hex": "#8da2fb"
+        }
+      },
+      "zero-retention": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.4, 0.851, 0.9098],
+          "hex": "#66d9e8"
+        }
+      },
+      "confidential": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.898, 0.6, 0.9686],
+          "hex": "#e599f7"
+        }
+      }
+    }
+  }
+}

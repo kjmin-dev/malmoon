@@ -1,0 +1,8 @@
+[tasks.dev]
+description = "Run the gateway on 127.0.0.1:8787 with the scripted demo captions"
+env = { MALMOON_DEMO_CAPTIONS = "1" }
+run = "cargo run --package malmoon-gateway"
+
+[tasks.build]
+description = "Build the gateway for release"
+run = "cargo build --release --package malmoon-gateway"

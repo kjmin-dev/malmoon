@@ -1,0 +1,21 @@
+[package]
+name = "malmoon-core"
+description = "Session protocol and caption logic shared by every Malmoon client and the gateway."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[features]
+# Derives TypeScript bindings for the protocol types. `mise run //:protocol` exports them.
+ts = ["dep:ts-rs"]
+
+[dependencies]
+serde = { workspace = true }
+ts-rs = { workspace = true, optional = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

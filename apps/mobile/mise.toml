@@ -1,0 +1,19 @@
+[tasks.dev]
+description = "Start the Expo dev server (expects the gateway to be running)"
+depends = ["//:install"]
+run = "pnpm exec expo start"
+
+[tasks.ios]
+description = "Run the mobile app in the iOS simulator"
+depends = ["//:install"]
+run = "pnpm exec expo start --ios"
+
+[tasks.android]
+description = "Run the mobile app in the Android emulator"
+depends = ["//:install"]
+run = "pnpm exec expo start --android"
+
+[tasks.bundle]
+description = "Bundle the mobile app for iOS and Android without a device, to prove it resolves"
+depends = ["//:install"]
+run = "pnpm exec expo export --platform ios --platform android --output-dir dist"

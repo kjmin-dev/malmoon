@@ -1,0 +1,28 @@
+packages:
+  - apps/web
+  - apps/mobile
+  - packages/*
+  - tools/*
+
+# One version of each of these across the workspace. Expo pins React exactly, and two copies of
+# React in one bundle break hooks.
+catalog:
+  "@types/react": ~19.3.0
+  react: 19.3.0
+  react-dom: 19.3.0
+  # Exact pin while 7.1 is in beta: a range such as ~7.1.0-beta also matches the nightly
+  # 7.1.0-dev.* builds, which sort above "beta". Move to ~7.1.0 when 7.1.0 is released.
+  typescript: 7.1.0-beta
+
+minimumReleaseAgeExclude:
+  - "@biomejs/biome@2.6.7"
+  - "@biomejs/cli-android-arm64@2.6.7"
+  - "@biomejs/cli-android-x64@2.6.7"
+  - "@biomejs/cli-darwin-arm64@2.6.7"
+  - "@biomejs/cli-darwin-x64@2.6.7"
+  - "@biomejs/cli-linux-arm64-musl@2.6.7"
+  - "@biomejs/cli-linux-arm64@2.6.7"
+  - "@biomejs/cli-linux-x64-musl@2.6.7"
+  - "@biomejs/cli-linux-x64@2.6.7"
+  - "@biomejs/cli-win32-arm64@2.6.7"
+  - "@biomejs/cli-win32-x64@2.6.7"
