@@ -1,0 +1,83 @@
+/*
+ * Points HeroUI's theme variables at Malmoon's design tokens.
+ *
+ * The tokens are the source of truth; this file and components.css are the only places that know
+ * HeroUI's names. HeroUI declares its defaults inside cascade layers, so these unlayered
+ * declarations win in both color schemes. A HeroUI component that this package does not wrap
+ * still picks up the right colors, radius and font from here.
+ */
+:root {
+  /* Surfaces */
+  --background: var(--mm-color-background-base);
+  --foreground: var(--mm-color-text-primary);
+  --background-secondary: var(--mm-color-background-surface);
+  --surface: var(--mm-color-background-surface);
+  --surface-foreground: var(--mm-color-text-primary);
+  --surface-hover: var(--mm-color-control-default);
+  --surface-secondary: var(--mm-color-control-default);
+  --surface-secondary-foreground: var(--mm-color-text-primary);
+  --overlay: var(--mm-color-background-raised);
+  --overlay-foreground: var(--mm-color-text-primary);
+  --overlay-shadow: var(--mm-shadow-raised);
+
+  /* Text and lines */
+  --muted: var(--mm-color-text-secondary);
+  --link: var(--mm-color-text-accent);
+  --border: var(--mm-color-border-default);
+  --separator: var(--mm-color-border-default);
+  --focus: var(--mm-color-border-focus);
+  --ring-offset-width: var(--mm-focus-offset);
+
+  /* Neutral controls */
+  --default: var(--mm-color-control-default);
+  --default-hover: var(--mm-color-control-hover);
+  --default-foreground: var(--mm-color-text-primary);
+
+  /* Accent */
+  --accent: var(--mm-color-accent-default);
+  --accent-hover: var(--mm-color-accent-hover);
+  --accent-foreground: var(--mm-color-text-on-accent);
+  --accent-soft: var(--mm-color-accent-subtle);
+  --accent-soft-hover: var(--mm-color-accent-subtle);
+  --accent-soft-foreground: var(--mm-color-text-accent);
+
+  /* Danger is a fill here. The status colors below are text colors, so their foreground is the
+     page background: dark on light, light on dark. */
+  --danger: var(--mm-color-danger-default);
+  --danger-hover: var(--mm-color-danger-hover);
+  --danger-foreground: var(--mm-color-text-on-danger);
+  --danger-soft: var(--mm-color-status-danger-subtle);
+  --danger-soft-hover: var(--mm-color-status-danger-subtle);
+  --danger-soft-foreground: var(--mm-color-status-danger);
+
+  --success: var(--mm-color-status-success);
+  --success-hover: var(--mm-color-status-success);
+  --success-foreground: var(--mm-color-background-base);
+  --success-soft: var(--mm-color-status-success-subtle);
+  --success-soft-hover: var(--mm-color-status-success-subtle);
+  --success-soft-foreground: var(--mm-color-status-success);
+
+  --warning: var(--mm-color-status-warning);
+  --warning-hover: var(--mm-color-status-warning);
+  --warning-foreground: var(--mm-color-background-base);
+  --warning-soft: var(--mm-color-status-warning-subtle);
+  --warning-soft-hover: var(--mm-color-status-warning-subtle);
+  --warning-soft-foreground: var(--mm-color-status-warning);
+
+  /* Fields. HeroUI draws them without a border; ours have one, because a field that differs
+     from the page only by a faint fill is hard to find (WCAG 1.4.11). */
+  --field-background: var(--mm-color-field-background);
+  --field-hover: var(--mm-color-field-background);
+  --field-focus: var(--mm-color-field-background);
+  --field-foreground: var(--mm-color-field-text);
+  --field-placeholder: var(--mm-color-field-placeholder);
+  --field-border: var(--mm-color-field-border);
+  --field-border-hover: var(--mm-color-text-primary);
+  --field-border-focus: var(--mm-color-field-border-focus);
+  --field-border-width: var(--mm-border-width-thin);
+  --field-radius: var(--mm-radius-md);
+  --field-shadow: none;
+
+  --radius: var(--mm-radius-md);
+  --font-sans: var(--mm-font-family-sans);
+}

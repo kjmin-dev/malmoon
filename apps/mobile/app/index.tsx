@@ -1,17 +1,12 @@
 import { errorMessage } from "@malmoon/auth";
 import { useSession } from "@malmoon/session/react";
-import { colors, font, radius, space } from "@malmoon/tokens";
+import { colors, radius, space, typography } from "@malmoon/tokens";
+import { Badge, Banner, Button, Text, useColors } from "@malmoon/ui-native";
 import { useCallback, useEffect, useState } from "react";
-import { StyleSheet, Text, useColorScheme, View } from "react-native";
+import { Text as NativeText, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { restoreSession, SESSION_URL, type Session, signOut } from "../src/auth.ts";
-import { Button, SignInScreen } from "../src/SignInScreen.tsx";
-
-const STATUS_LABEL = {
-  connecting: "연결하는 중",
-  live: "연결됨",
-  offline: "연결 끊김",
-} as const;
+import { SignInScreen } from "../src/SignInScreen.tsx";
 
 type State =
   | { name: "loading" }
@@ -21,7 +16,7 @@ type State =
   | { name: "unreachable"; message: string };
 
 export default function Home() {
-  const palette = colors[useColorScheme() === "dark" ? "dark" : "light"];
+  const palette = useColors();
   const [state, setState] = useState<State>({ name: "loading" });
 
   const restore = useCallback(() => {
@@ -36,14 +31,16 @@ export default function Home() {
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: palette.backgroundBase }]}>
       {state.name !== "signed_in" && (
-        <Text style={[styles.title, { color: palette.textPrimary }]}>Malmoon</Text>
+        <Text variant="display" heading>
+          Malmoon
+        </Text>
       )}
       {state.name === "signed_out" && (
         <SignInScreen onSignedIn={(session) => setState({ name: "signed_in", session })} />
       )}
       {state.name === "unreachable" && (
         <>
-          <Text style={{ color: palette.textSecondary }}>{state.message}</Text>
+          <Banner tone="danger">{state.message}</Banner>
           <Button label="다시 시도" onPress={restore} />
         </>
       )}
@@ -57,59 +54,64 @@ export default function Home() {
   );
 }
 
+const STATUS = {
+  connecting: { tone: "warning", label: "연결하는 중" },
+  live: { tone: "success", label: "연결됨" },
+  offline: { tone: "danger", label: "연결 끊김" },
+} as const;
+
 /** Mounted only while signed in: the gateway refuses sessions without an account. */
 function Captions({ session, onSignOut }: { session: Session; onSignOut: () => void }) {
-  const palette = colors[useColorScheme() === "dark" ? "dark" : "light"];
   const { status, segments } = useSession(SESSION_URL, "mobile", session.token);
-  const statusColor = {
-    connecting: palette.statusWarning,
-    live: palette.statusSuccess,
-    offline: palette.statusDanger,
-  }[status.state];
+  // The prompter surface is dark in both color schemes, like the desktop overlay.
+  const overlay = colors.dark;
 
   return (
     <>
       <View style={styles.header}>
-        <Text style={[styles.title, { color: palette.textPrimary }]}>Malmoon</Text>
-        <Text style={[styles.status, { color: statusColor }]}>{STATUS_LABEL[status.state]}</Text>
+        <Text variant="title" heading>
+          Malmoon
+        </Text>
+        <Badge tone={STATUS[status.state].tone} label={STATUS[status.state].label} dot />
       </View>
 
-      {/* The prompter surface is dark in both color schemes, like the desktop overlay. */}
-      <View style={[styles.captions, { backgroundColor: palette.overlaySurface }]}>
+      <View style={[styles.captions, { backgroundColor: overlay.overlaySurface }]}>
         {segments.length === 0 && (
-          <Text style={{ color: palette.overlayTextDraft }}>자막을 기다리는 중</Text>
+          <NativeText style={[typography.body, { color: overlay.overlayTextDraft }]}>
+            자막을 기다리는 중
+          </NativeText>
         )}
         {segments.map((segment) => (
           <View key={segment.segment_id}>
-            <Text
+            <NativeText
               // Break Korean between words, not between syllables. Android has no equivalent yet.
               lineBreakStrategyIOS="hangul-word"
               style={[
-                styles.original,
+                typography.caption,
                 {
                   color:
                     segment.stage === "draft"
-                      ? palette.overlayTextDraft
-                      : palette.overlayTextPrimary,
+                      ? overlay.overlayTextDraft
+                      : overlay.overlayTextPrimary,
                 },
               ]}
             >
               {segment.original}
-            </Text>
+            </NativeText>
             {segment.translation && (
-              <Text
+              <NativeText
                 lineBreakStrategyIOS="hangul-word"
-                style={[styles.translation, { color: palette.overlayTextDraft }]}
+                style={[typography.body, { color: overlay.overlayTextDraft }]}
               >
                 {segment.translation}
-              </Text>
+              </NativeText>
             )}
           </View>
         ))}
       </View>
 
       {status.state === "offline" && (
-        <Text style={[styles.hint, { color: palette.textSecondary }]}>
+        <Text variant="detail" tone="secondary">
           {"게이트웨이에 연결할 수 없습니다. `mise run //apps/gateway:dev`로 실행하세요."}
         </Text>
       )}
@@ -129,31 +131,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  title: {
-    fontSize: font.size.xl,
-    fontWeight: font.weight.bold,
-  },
-  status: {
-    fontSize: font.size.sm,
-    fontWeight: font.weight.semibold,
-  },
   captions: {
     minHeight: 240,
     justifyContent: "flex-end",
     gap: space[3],
     padding: space[4],
     borderRadius: radius.lg,
-  },
-  original: {
-    fontSize: font.size.caption,
-    lineHeight: font.size.caption * font.lineHeight.tight,
-    fontWeight: font.weight.semibold,
-  },
-  translation: {
-    fontSize: font.size.md,
-    lineHeight: font.size.md * font.lineHeight.normal,
-  },
-  hint: {
-    fontSize: font.size.sm,
   },
 });

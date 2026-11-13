@@ -1,0 +1,134 @@
+/*
+ * Gives the HeroUI components this package wraps the sizes, shapes and state colors of the
+ * design tokens. HeroUI's class names and its per-component variables (`--button-bg` and so on)
+ * are its documented styling surface.
+ *
+ * Everything sits in the `components` layer, after HeroUI's own rules, so it replaces them and
+ * a Tailwind utility on an element still wins.
+ */
+@layer components {
+  /* ------------------------------------------------------------ button */
+
+  .button {
+    height: var(--mm-size-control-md);
+    /* Never narrower than it is tall, and never smaller than the smallest pressable area. */
+    min-width: max(var(--mm-size-control-md), var(--mm-size-target-min));
+    padding-inline: var(--mm-space-4);
+    gap: var(--mm-space-2);
+    border-radius: var(--mm-radius-md);
+    font-size: var(--mm-typography-label-size);
+    font-weight: var(--mm-typography-label-weight);
+    line-height: var(--mm-typography-label-line-height);
+    transition-duration: var(--mm-motion-duration-fast);
+    transition-timing-function: var(--mm-motion-easing-standard);
+  }
+
+  .button--sm {
+    height: var(--mm-size-control-sm);
+    min-width: max(var(--mm-size-control-sm), var(--mm-size-target-min));
+    padding-inline: var(--mm-space-3);
+  }
+
+  .button--lg {
+    height: var(--mm-size-control-lg);
+    min-width: var(--mm-size-control-lg);
+    padding-inline: var(--mm-space-6);
+    font-size: var(--mm-typography-body-strong-size);
+  }
+
+  .button--primary {
+    --button-bg: var(--mm-color-button-primary-background);
+    --button-bg-hover: var(--mm-color-button-primary-background-hover);
+    --button-bg-pressed: var(--mm-color-button-primary-background-pressed);
+    --button-fg: var(--mm-color-button-primary-text);
+  }
+
+  .button--secondary {
+    --button-bg: var(--mm-color-button-secondary-background);
+    --button-bg-hover: var(--mm-color-button-secondary-background-hover);
+    --button-bg-pressed: var(--mm-color-button-secondary-background-pressed);
+    --button-fg: var(--mm-color-button-secondary-text);
+  }
+
+  .button--ghost {
+    --button-bg: transparent;
+    --button-bg-hover: var(--mm-color-button-ghost-background-hover);
+    --button-bg-pressed: var(--mm-color-button-ghost-background-pressed);
+    --button-fg: var(--mm-color-button-ghost-text);
+  }
+
+  .button--danger {
+    --button-bg: var(--mm-color-button-danger-background);
+    --button-bg-hover: var(--mm-color-button-danger-background-hover);
+    --button-bg-pressed: var(--mm-color-button-danger-background-pressed);
+    --button-fg: var(--mm-color-button-danger-text);
+  }
+
+  /* A disabled button is recolored, not faded: fading a colored fill leaves a pale version of
+     the same color that still looks pressable. */
+  .button:disabled:not([data-pending="true"]),
+  .button[aria-disabled="true"]:not([data-pending="true"]) {
+    opacity: 1;
+    --button-bg: var(--mm-color-button-disabled-background);
+    --button-fg: var(--mm-color-button-disabled-text);
+  }
+
+  .button--ghost:disabled:not([data-pending="true"]),
+  .button--ghost[aria-disabled="true"]:not([data-pending="true"]) {
+    --button-bg: transparent;
+  }
+
+  /* While pending the label stays, so the button keeps its width, and so do the colors: the
+     action was accepted, which is the opposite of unavailable. */
+  .button[data-pending="true"] {
+    opacity: 1;
+    cursor: progress;
+  }
+
+  /* ------------------------------------------------------------ text field */
+
+  .input {
+    min-height: var(--mm-size-control-md);
+    padding-inline: var(--mm-space-3);
+    padding-block: 0;
+    border-radius: var(--mm-radius-md);
+    /* 16px on every screen: below that, iOS zooms the page when the field takes focus. */
+    font-size: var(--mm-typography-body-size);
+    line-height: var(--mm-typography-body-line-height);
+  }
+
+  .input[data-invalid="true"],
+  .input[aria-invalid="true"] {
+    border-color: var(--mm-color-field-border-invalid);
+    /* Thicker as well as red, so the state does not depend on telling colors apart. */
+    box-shadow: inset 0 0 0 var(--mm-border-width-thin) var(--mm-color-field-border-invalid);
+  }
+
+  .label {
+    font-size: var(--mm-typography-label-size);
+    font-weight: var(--mm-typography-label-weight);
+    line-height: var(--mm-typography-label-line-height);
+    color: var(--mm-color-text-primary);
+  }
+
+  /* The label of an invalid field stays readable; the border and the message carry the error. */
+  [data-invalid="true"] .label,
+  [aria-invalid="true"] .label {
+    color: var(--mm-color-text-primary);
+  }
+
+  .description,
+  .field-error {
+    padding-inline: 0;
+    font-size: var(--mm-typography-detail-size);
+    line-height: var(--mm-typography-detail-line-height);
+  }
+
+  .description {
+    color: var(--mm-color-text-secondary);
+  }
+
+  .field-error {
+    color: var(--mm-color-status-danger);
+  }
+}

@@ -1,0 +1,28 @@
+/*
+ * The one stylesheet a web app imports. Order matters: HeroUI brings Tailwind and its own
+ * defaults, the tokens come next, and the last two files point HeroUI at the tokens.
+ */
+@import "@heroui/styles";
+
+@import "@malmoon/tokens/theme.css";
+@import "@malmoon/tokens/tailwind.css";
+@import "./heroui-theme.css";
+@import "./components.css";
+
+/* The components in this package use Tailwind utilities; tell Tailwind where to find them. */
+@source "..";
+
+:root {
+  font-family: var(--mm-font-family-sans);
+  /* Korean breaks between words, not between syllables. */
+  word-break: keep-all;
+  /* Long unbroken strings (URLs, email addresses) still wrap instead of overflowing. */
+  overflow-wrap: anywhere;
+}
+
+body {
+  background-color: var(--mm-color-background-base);
+  color: var(--mm-color-text-primary);
+  font-size: var(--mm-typography-body-size);
+  line-height: var(--mm-typography-body-line-height);
+}

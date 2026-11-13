@@ -1,6 +1,6 @@
-import { Button, Card, Chip } from "@heroui/react";
 import type { Account } from "@malmoon/auth";
 import { useSession } from "@malmoon/session/react";
+import { Badge, Banner, Button, Card, Text } from "@malmoon/ui";
 import { useEffect, useState } from "react";
 import { AccountCard } from "./AccountCard.tsx";
 import { type Boot, booted, SESSION_URL } from "./auth.ts";
@@ -29,27 +29,24 @@ export function App() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-3xl flex-col gap-6 p-6">
       <header className="flex items-center justify-between">
-        <h1 className="font-mm-bold text-mm-xl">Malmoon</h1>
-        <Button variant="secondary" size="sm" onPress={toggleTheme}>
+        <Text variant="title" as="h1">
+          Malmoon
+        </Text>
+        <Button variant="ghost" size="sm" onPress={toggleTheme}>
           {theme === "dark" ? "밝은 화면" : "어두운 화면"}
         </Button>
       </header>
 
       {boot?.notice && (
-        <p
-          role={boot.notice.tone === "danger" ? "alert" : "status"}
-          className={`text-mm-sm ${boot.notice.tone === "danger" ? "text-danger" : "text-success"}`}
-        >
+        <Banner tone={boot.notice.tone === "danger" ? "danger" : "success"}>
           {boot.notice.text}
-        </p>
+        </Banner>
       )}
 
       {boot === undefined ? null : boot.account === null ? (
         <>
           {boot.handoff && (
-            <p className="text-center text-mm-sm text-muted">
-              데스크톱 앱에 로그인하려면 먼저 여기에서 로그인해 주세요.
-            </p>
+            <Banner tone="info">데스크톱 앱에 로그인하려면 먼저 여기에서 로그인해 주세요.</Banner>
           )}
           <SignIn onSignedIn={setAccount} />
         </>
@@ -72,23 +69,32 @@ export function App() {
 /** Mounted only while signed in: the gateway refuses sessions without an account. */
 function LiveCaptions() {
   const { status, segments } = useSession(SESSION_URL, "web");
+  const badge = {
+    live: (
+      <Badge tone="success" dot>
+        연결됨
+      </Badge>
+    ),
+    connecting: (
+      <Badge tone="warning" dot>
+        연결하는 중
+      </Badge>
+    ),
+    offline: (
+      <Badge tone="danger" dot>
+        연결 끊김
+      </Badge>
+    ),
+  }[status.state];
   return (
-    <Card>
-      <Card.Header className="flex-row items-center justify-between">
-        <Card.Title>실시간 자막</Card.Title>
-        {status.state === "live" && <Chip color="success">연결됨</Chip>}
-        {status.state === "connecting" && <Chip color="warning">연결하는 중</Chip>}
-        {status.state === "offline" && <Chip color="danger">연결 끊김</Chip>}
-      </Card.Header>
-      <Card.Content>
-        <Captions segments={segments} />
-        {status.state === "offline" && (
-          <p className="mt-3 text-mm-sm text-muted">
-            게이트웨이에 연결할 수 없습니다. <code>{"mise run //apps/gateway:dev"}</code>로
-            실행하세요.
-          </p>
-        )}
-      </Card.Content>
+    <Card title="실시간 자막" actions={badge}>
+      <Captions segments={segments} />
+      {status.state === "offline" && (
+        <Text variant="detail" tone="secondary">
+          게이트웨이에 연결할 수 없습니다. <code>{"mise run //apps/gateway:dev"}</code>로
+          실행하세요.
+        </Text>
+      )}
     </Card>
   );
 }
