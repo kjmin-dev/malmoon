@@ -34,7 +34,7 @@
 | 디자인 시스템 | 자체 DTCG 토큰에서 CSS, TypeScript, Rust 코드를 생성 |
 | 음성 인식 | Soniox (예비 ElevenLabs) |
 | 언어 모델 | Claude Haiku 5.5, Claude Sonnet 5.5 |
-| 도구 | mise, Cargo 워크스페이스, pnpm 워크스페이스, Biome |
+| 도구 | mise, Cargo 워크스페이스, pnpm 워크스페이스, TypeScript 7.1(네이티브 컴파일러), Biome |
 
 ## 개발
 

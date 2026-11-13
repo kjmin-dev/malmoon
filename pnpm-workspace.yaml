@@ -10,7 +10,9 @@ catalog:
   "@types/react": ~19.3.0
   react: 19.3.0
   react-dom: 19.3.0
-  typescript: ~6.0.3
+  # Exact pin while 7.1 is in beta: a range such as ~7.1.0-beta also matches the nightly
+  # 7.1.0-dev.* builds, which sort above "beta". Move to ~7.1.0 when 7.1.0 is released.
+  typescript: 7.1.0-beta
 
 minimumReleaseAgeExclude:
   - "@biomejs/biome@2.6.7"
