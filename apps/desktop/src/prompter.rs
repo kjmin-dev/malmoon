@@ -1,6 +1,5 @@
 //! The prompter: live captions over the meeting, and a bar to ask or translate.
 
-use futures_channel::mpsc::UnboundedReceiver;
 use futures_util::StreamExt;
 use gpui_kit::component::{
     Sizable,
@@ -15,12 +14,14 @@ use malmoon_core::caption::CaptionBuffer;
 use malmoon_tokens as tokens;
 use malmoon_ui::{CaptionStream, color};
 
-use crate::session::SessionEvent;
+use crate::session::{Command, Handle, SessionEvent};
 
 /// Settled segments kept on screen. Older ones scroll away.
 const VISIBLE_SEGMENTS: usize = 3;
 
 enum Status {
+    SignedOut(Option<String>),
+    SigningIn,
     Connecting,
     Live,
     Offline(String),
@@ -30,15 +31,12 @@ pub struct Prompter {
     captions: CaptionBuffer,
     status: Status,
     ask: Entity<InputState>,
+    commands: tokio::sync::mpsc::UnboundedSender<Command>,
     _subscriptions: Vec<Subscription>,
 }
 
 impl Prompter {
-    pub fn new(
-        mut events: UnboundedReceiver<SessionEvent>,
-        window: &mut Window,
-        cx: &mut Context<Self>,
-    ) -> Self {
+    pub fn new(session: Handle, window: &mut Window, cx: &mut Context<Self>) -> Self {
         let ask = cx.new(|cx| {
             InputState::new(window, cx).placeholder("질문하거나 번역할 문장을 입력하세요")
         });
@@ -51,6 +49,10 @@ impl Prompter {
             }
         });
 
+        let Handle {
+            mut events,
+            commands,
+        } = session;
         cx.spawn(async move |this, cx| {
             while let Some(event) = events.next().await {
                 let updated = this.update(cx, |this, cx| {
@@ -68,12 +70,19 @@ impl Prompter {
             captions: CaptionBuffer::new(VISIBLE_SEGMENTS),
             status: Status::Connecting,
             ask,
+            commands,
             _subscriptions: vec![activate_on_focus],
         }
     }
 
     fn handle(&mut self, event: SessionEvent) {
         match event {
+            SessionEvent::SignedOut { problem } => {
+                self.status = Status::SignedOut(problem);
+                // Captions belong to the account that was signed in.
+                self.captions.clear();
+            }
+            SessionEvent::SigningIn => self.status = Status::SigningIn,
             SessionEvent::Connecting => self.status = Status::Connecting,
             SessionEvent::Ready => {
                 self.status = Status::Live;
@@ -95,12 +104,20 @@ impl Render for Prompter {
         let text_width = window.viewport_size().width - padding * 2.0;
 
         let (status_color, status_text): (_, SharedString) = match &self.status {
+            Status::SignedOut(None) => (colors.status_warning, "로그인이 필요합니다".into()),
+            Status::SignedOut(Some(problem)) => (colors.status_danger, problem.clone().into()),
+            Status::SigningIn => (
+                colors.status_warning,
+                "브라우저에서 로그인을 마쳐 주세요".into(),
+            ),
             Status::Connecting => (colors.status_warning, "게이트웨이에 연결하는 중".into()),
             Status::Live => (colors.status_success, "연결됨".into()),
             Status::Offline(reason) => {
                 (colors.status_danger, format!("연결 끊김 · {reason}").into())
             }
         };
+
+        let signed_in = !matches!(self.status, Status::SignedOut(_) | Status::SigningIn);
 
         let header = div()
             .flex()
@@ -116,6 +133,16 @@ impl Render for Prompter {
                     .bg(color(status_color)),
             )
             .child(div().flex_1().truncate().child(status_text))
+            .children(signed_in.then(|| {
+                let commands = self.commands.clone();
+                Button::new("sign-out")
+                    .ghost()
+                    .xsmall()
+                    .label("로그아웃")
+                    .on_click(move |_, _, _| {
+                        let _ = commands.send(Command::SignOut);
+                    })
+            }))
             .child(
                 Button::new("quit")
                     .ghost()
@@ -124,8 +151,27 @@ impl Render for Prompter {
                     .on_click(|_, _, cx| cx.quit()),
             );
 
-        let captions = if self.captions.is_empty() {
+        let captions = if let Status::SignedOut(_) = self.status {
+            let commands = self.commands.clone();
+            div()
+                .flex()
+                .flex_col()
+                .items_start()
+                .gap(px(tokens::SPACE_3))
+                .text_color(color(colors.overlay_text_draft))
+                .child("자막을 보려면 로그인하세요. 브라우저가 열립니다.")
+                .child(
+                    Button::new("sign-in")
+                        .primary()
+                        .label("브라우저에서 로그인")
+                        .on_click(move |_, _, _| {
+                            let _ = commands.send(Command::SignIn);
+                        }),
+                )
+                .into_any_element()
+        } else if self.captions.is_empty() {
             let hint = match self.status {
+                Status::SigningIn => "브라우저에서 로그인하면 여기로 돌아옵니다.",
                 Status::Offline(_) => "`mise run //apps/gateway:dev`로 게이트웨이를 실행하세요.",
                 _ => "자막을 기다리는 중",
             };

@@ -2,8 +2,10 @@
 //!
 //!   malmoon [--click-through] [--hide-from-capture] [--exit-after <seconds>]
 //!
-//! `MALMOON_GATEWAY_URL` sets the gateway to connect to (default `ws://127.0.0.1:8787`).
+//! `MALMOON_GATEWAY_URL` sets the gateway to connect to (default `ws://127.0.0.1:8787`), and
+//! `MALMOON_WEB_URL` the web app that signs the person in (default `http://localhost:5173`).
 
+mod auth;
 mod platform;
 mod prompter;
 mod session;
@@ -22,7 +24,7 @@ use crate::prompter::Prompter;
 actions!(malmoon, [Quit]);
 
 struct Options {
-    gateway_url: String,
+    session: session::Config,
     overlay: OverlayOptions,
     /// Quit after this long. For smoke tests.
     exit_after: Option<Duration>,
@@ -39,8 +41,12 @@ impl Options {
             .and_then(|seconds| seconds.parse().ok())
             .map(Duration::from_secs_f64);
         Self {
-            gateway_url: std::env::var("MALMOON_GATEWAY_URL")
-                .unwrap_or_else(|_| "ws://127.0.0.1:8787".to_owned()),
+            session: session::Config {
+                gateway_url: std::env::var("MALMOON_GATEWAY_URL")
+                    .unwrap_or_else(|_| "ws://127.0.0.1:8787".to_owned()),
+                web_url: std::env::var("MALMOON_WEB_URL")
+                    .unwrap_or_else(|_| "http://localhost:5173".to_owned()),
+            },
             overlay: OverlayOptions {
                 click_through: has("--click-through"),
                 hide_from_capture: has("--hide-from-capture"),
@@ -52,7 +58,7 @@ impl Options {
 
 fn main() {
     let options = Options::from_env();
-    let events = session::spawn(options.gateway_url);
+    let session = session::spawn(options.session);
 
     gpui_kit::application().with_assets(Assets).run(move |cx| {
         malmoon_ui::init(cx);
@@ -75,7 +81,7 @@ fn main() {
         };
         gpui_kit::open_window(window_options, cx, move |window, cx| {
             platform::configure_overlay(window, options.overlay);
-            cx.new(|cx| Prompter::new(events, window, cx))
+            cx.new(|cx| Prompter::new(session, window, cx))
         })
         .expect("the prompter window could not open");
 
