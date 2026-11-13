@@ -2,7 +2,7 @@
 
 여러 언어가 오가는 회의에서 듣고, 말하고, 마무리하는 것까지 돕는 실시간 회의 코파일럿.
 
-지금은 기획과 기술 검증 단계다. 이 저장소에는 시장 분석, 제품 기획, 아키텍처 설계 문서와 함께 네 플랫폼의 뼈대 코드가 있다. 뼈대는 게이트웨이가 보내는 데모 자막을 데스크톱, 웹, 모바일이 받아 표시하는 데까지 이어져 있고, 음성 인식과 오디오 캡처는 아직 없다.
+지금은 기획과 기술 검증 단계다. 이 저장소에는 시장 분석, 제품 기획, 아키텍처 설계 문서와 함께 네 플랫폼의 뼈대 코드가 있다. 뼈대는 로그인한 사용자에게 게이트웨이가 보내는 데모 자막을 데스크톱, 웹, 모바일이 받아 표시하는 데까지 이어져 있고, 음성 인식과 오디오 캡처는 아직 없다.
 
 ## 문서
 
@@ -14,6 +14,7 @@
 | [시스템 아키텍처](docs/04-architecture.md) | 클라이언트 구성, 실시간 파이프라인, 데이터 경로, 원가 |
 | [음성 인식 모델 비교](docs/05-stt-comparison.md) | 실시간 전사 후보의 특징, 성능, 비용 |
 | [디자인 시스템 아키텍처](docs/06-design-system.md) | 토큰 하나에서 웹, 데스크톱, 모바일의 코드를 생성하는 방법 |
+| [계정과 로그인](docs/07-accounts.md) | 계정 모델, 이메일 코드와 소셜 로그인, 계정 연결 규칙, 세션 |
 | [출처](docs/sources.md) | 조사에 쓴 자료와 확인하지 못한 항목 |
 
 ## 핵심 결정
@@ -31,6 +32,7 @@
 | 웹 | React 19, Vite, Tailwind, HeroUI |
 | 모바일 | React Native (Expo) |
 | 공유 코어와 게이트웨이 | Rust (axum, tokio) |
+| 계정 | 자체 PostgreSQL, 이메일 코드와 Google, Apple, 카카오, LINE 로그인 |
 | 디자인 시스템 | 자체 DTCG 토큰에서 CSS, TypeScript, Rust 코드를 생성 |
 | 음성 인식 | Soniox (예비 ElevenLabs) |
 | 언어 모델 | Claude Haiku 5.5, Claude Sonnet 5.5 |
@@ -49,22 +51,26 @@ mise tasks --all    # 작업 목록
 자막이 흐르는 것을 보려면 게이트웨이를 먼저 띄우고 클라이언트를 실행한다.
 
 ```sh
-mise run //gateway:dev    # 데모 자막을 보내는 게이트웨이 (127.0.0.1:8787)
+mise run //gateway:dev    # 게이트웨이 (127.0.0.1:8787). 로컬 PostgreSQL을 Docker로 함께 띄운다
 mise run //desktop:dev    # 데스크톱 프롬프터 오버레이 (macOS)
 mise run //web:dev        # 웹 앱 (http://localhost:5173)
 mise run //mobile:dev     # Expo 개발 서버
 ```
 
+자막은 로그인해야 보인다. 메일 발송이 아직 없어서, 로그인 코드는 게이트웨이 로그에 찍힌다. 데스크톱 앱은 브라우저로 웹 앱을 열어 로그인하므로 웹 앱이 떠 있어야 한다.
+
 | 경로 | 내용 |
 | --- | --- |
 | `apps/desktop` | GPUI 프롬프터 오버레이 |
-| `apps/gateway` | 실시간 게이트웨이. 지금은 세션 인사와 데모 자막만 있다 |
+| `apps/gateway` | 실시간 게이트웨이와 계정 API. 실시간 쪽은 세션 인사와 데모 자막만 있다 |
 | `apps/web` | React 웹 앱 |
 | `apps/mobile` | Expo 모바일 앱 |
+| `crates/malmoon-auth` | 계정, 이메일 코드와 소셜 로그인, 세션 |
 | `crates/malmoon-core` | 세션 프로토콜, 자막 안정화, 어절 단위 줄바꿈 |
 | `crates/malmoon-tokens` | 생성된 Rust 토큰 |
 | `crates/malmoon-ui` | 토큰을 입힌 GPUI 컴포넌트 |
 | `packages/tokens` | 생성된 CSS, Tailwind 테마, TypeScript 토큰 |
+| `packages/auth` | 계정 API 클라이언트 |
 | `packages/session` | 생성된 프로토콜 타입과 세션 클라이언트 |
 | `design/tokens` | 디자인 토큰의 원천 |
 | `tools/design-build` | 토큰 검증과 생성기 |
