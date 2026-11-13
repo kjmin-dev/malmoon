@@ -1,6 +1,6 @@
-// The design system on one page: every token group and every component in every variant and
-// state. Open http://localhost:5173/design.html while `mise run //web:dev` is running. It is a
-// development page and is not part of the production build.
+// The design preview: every token group and every component in every variant and state, at
+// `/design`. The mobile app has the same screen at `/design`, and the desktop app opens it with
+// `malmoon --design`.
 
 import { colors, radius, size, space, typography } from "@malmoon/tokens";
 import {
@@ -61,7 +61,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-export function Gallery() {
+export function DesignPreview() {
   const [theme, setTheme] = useState(document.documentElement.dataset.theme as Theme);
   const [value, setValue] = useState("");
   const toggleTheme = () => {
@@ -76,9 +76,14 @@ export function Gallery() {
         <Text variant="display" as="h1">
           Malmoon 디자인 시스템
         </Text>
-        <Button variant="ghost" size="sm" onPress={toggleTheme}>
-          {theme === "dark" ? "밝은 화면" : "어두운 화면"}
-        </Button>
+        <div className="flex items-center gap-3">
+          <a className="text-mm-detail text-mm-text-accent underline" href="/">
+            앱으로
+          </a>
+          <Button variant="ghost" size="sm" onPress={toggleTheme}>
+            {theme === "dark" ? "밝은 화면" : "어두운 화면"}
+          </Button>
+        </div>
       </header>
 
       <Section title="색">

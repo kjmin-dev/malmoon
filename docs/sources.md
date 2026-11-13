@@ -73,5 +73,5 @@
 - 16px보다 작은 입력 칸에서 iOS Safari가 페이지를 확대하는 동작의 공식 문서
 - Material Design 3과 Apple Human Interface Guidelines의 본문 (페이지를 읽지 못해 요약으로 확인했다)
 - HeroUI Pro와 Uniwind Pro의 유료 범위
-- 모바일 앱의 실제 기기와 Android 실행 (iOS 시뮬레이터에서 갤러리와 로그인 화면만 봤다)
+- 모바일 앱의 실제 기기와 Android 실행 (iOS 시뮬레이터에서 디자인 프리뷰와 로그인 화면만 봤다)
 - Iced, Slint, egui의 글자 품질과 성능 (문서와 소스만 읽었다)
